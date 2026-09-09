@@ -5,6 +5,7 @@
   <title>Customer Service Ticketing Dashboard</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;display=swap" rel="stylesheet">
   <style>
     :root {
@@ -181,7 +182,8 @@
   <script src="/_sdk/20ec72cea0cb85e1.editing_sdk.js" integrity="sha512-y1Lf0yXrnk1vqzLs9a/3x3pp+jSvei2Pbl+x/omYgN5b7HqLzMgs5Vx9HdgcQfw7jcDinPHCzHGQ6BsPf/68zQ=="></script>
   <script>
     (() => {
-      const tickets = []; /*
+      let tickets = [];
+      /*
         {
           id: "TKT-2026-000001",
           customer: "شركة المدار للتجارة",
@@ -312,7 +314,8 @@
       ];
 
       */
-      const employees = []; /*
+      let employees = [];
+      /*
         { name: "سارة أحمد", email: "sara@example.com", role: "مشرفة دعم", team: "المدفوعات", status: "Active" },
         { name: "خالد حسن", email: "khaled@example.com", role: "موظف دعم", team: "العملاء", status: "Active" },
         { name: "نورة عبدالله", email: "noura@example.com", role: "موظفة دعم", team: "الاسترداد", status: "Active" },
@@ -321,15 +324,198 @@
       ];
 
       */
-      const issueShortcuts = []; /*"تعذر إتمام الدفع", "لم يصل رمز القسيمة", "طلب استرداد مبلغ", "خطأ عند تسجيل الدخول", "تعديل بيانات الفاتورة"];
+      let issueShortcuts = []; /*"تعذر إتمام الدفع", "لم يصل رمز القسيمة", "طلب استرداد مبلغ", "خطأ عند تسجيل الدخول", "تعديل بيانات الفاتورة"];
       */
-      const ticketSources = [];
+      let ticketSources = [];
 
       let currentView = "dashboard";
       let selectedTicketId = "";
       let currentActor = "Admin";
       let language = "ar";
       let toastTimer;
+
+      // ============================
+      // Supabase configuration
+      // ============================
+      // Replace these two values with:
+      // Supabase Dashboard -> Project Settings -> API
+      const SUPABASE_URL = "https://eojlplddbjodknseubva.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_No1R26-FkTL-YAuAykugtA_k0BxK39f";
+      const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window.supabaseClient = supabaseClient;
+
+      let currentUser = null;
+      let currentEmployeeId = null;
+
+      async function getSession() {
+        const { data, error } = await supabaseClient.auth.getSession();
+        if (error) throw error;
+        currentUser = data.session?.user || null;
+        return currentUser;
+      }
+
+      async function requireLogin() {
+        const user = await getSession();
+        if (!user) {
+          const email = window.prompt(language === "ar" ? "أدخل البريد الإلكتروني" : "Enter email");
+          const password = window.prompt(language === "ar" ? "أدخل كلمة المرور" : "Enter password");
+          if (!email || !password) throw new Error(language === "ar" ? "تم إلغاء تسجيل الدخول." : "Login cancelled.");
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          currentUser = data.user;
+        }
+        return currentUser;
+      }
+
+      async function dbError(error) {
+        console.error(error);
+        showToast((language === "ar" ? "حدث خطأ: " : "Error: ") + (error?.message || "Unknown error"));
+      }
+
+      async function loadData() {
+        await requireLogin();
+
+        const [
+          ticketsRes,
+          employeesRes,
+          sourcesRes,
+          shortcutsRes
+        ] = await Promise.all([
+          supabaseClient.from("tickets").select("*").order("created_at", { ascending: false }),
+          supabaseClient.from("employees").select("*").order("name"),
+          supabaseClient.from("ticket_sources").select("*").eq("is_active", true).order("name"),
+          supabaseClient.from("issue_shortcuts").select("*").eq("is_active", true).order("label")
+        ]);
+
+        for (const result of [ticketsRes, employeesRes, sourcesRes, shortcutsRes]) {
+          if (result.error) throw result.error;
+        }
+
+        employees = employeesRes.data || [];
+        ticketSources = (sourcesRes.data || []).map(x => x.name);
+        issueShortcuts = (shortcutsRes.data || []).map(x => x.label);
+
+        const rawTickets = ticketsRes.data || [];
+        tickets = rawTickets.map(t => ({
+          id: t.ticket_number,
+          dbId: t.id,
+          customer: t.customer_name,
+          issue: t.issue_summary,
+          description: t.issue_description || "",
+          category: t.category,
+          source: t.source || "",
+          priority: t.priority,
+          assignee: employees.find(e => e.id === t.assignee_id)?.name || "",
+          assigneeId: t.assignee_id,
+          status: t.status,
+          createdAt: t.created_at?.slice(0, 10) || "",
+          closedAt: t.closed_at?.slice(0, 10) || "",
+          updated: t.updated_at || "",
+          messages: [],
+          attachments: []
+        }));
+
+        // Load messages and attachments in parallel.
+        await Promise.all(tickets.map(async ticket => {
+          const [messagesRes, attachmentsRes] = await Promise.all([
+            supabaseClient.from("ticket_messages").select("*").eq("ticket_id", ticket.dbId).order("created_at", { ascending: true }),
+            supabaseClient.from("ticket_attachments").select("*").eq("ticket_id", ticket.dbId).order("created_at", { ascending: true })
+          ]);
+          if (messagesRes.error) throw messagesRes.error;
+          if (attachmentsRes.error) throw attachmentsRes.error;
+
+          ticket.messages = (messagesRes.data || []).map(m => ({
+            id: m.id,
+            author: m.author_name || "Support",
+            role: m.role || "support",
+            text: m.message || "",
+            at: m.created_at,
+            attachment: null
+          }));
+
+          ticket.attachments = [];
+          for (const file of (attachmentsRes.data || [])) {
+            const signed = await supabaseClient.storage
+              .from("ticket-attachments")
+              .createSignedUrl(file.storage_path, 3600);
+            ticket.attachments.push({
+              id: file.id,
+              name: file.file_name,
+              type: file.mime_type,
+              size: file.file_size,
+              path: file.storage_path,
+              url: signed.data?.signedUrl || "#"
+            });
+          }
+        }));
+      }
+
+      async function refreshAndRender(view = currentView) {
+        try {
+          await loadData();
+          currentView = view;
+          render();
+        } catch (error) {
+          await dbError(error);
+        }
+      }
+
+      async function uploadTicketFiles(ticketDbId, files) {
+        const selectedFiles = Array.from(files || []);
+        for (const file of selectedFiles) {
+          const safeName = file.name.replace(/[^\w.\-() ]/g, "_");
+          const path = `${ticketDbId}/${crypto.randomUUID()}-${safeName}`;
+          const upload = await supabaseClient.storage.from("ticket-attachments").upload(path, file, {
+            cacheControl: "3600",
+            upsert: false
+          });
+          if (upload.error) throw upload.error;
+
+          const insert = await supabaseClient.from("ticket_attachments").insert({
+            ticket_id: ticketDbId,
+            file_name: file.name,
+            storage_path: path,
+            mime_type: file.type || "application/octet-stream",
+            file_size: file.size,
+            uploaded_by: currentUser?.id || null
+          });
+          if (insert.error) throw insert.error;
+        }
+      }
+
+      async function addMessage(ticketDbId, text, actor, attachmentFile = null) {
+        let attachmentId = null;
+        if (attachmentFile) {
+          const safeName = attachmentFile.name.replace(/[^\w.\-() ]/g, "_");
+          const path = `${ticketDbId}/messages/${crypto.randomUUID()}-${safeName}`;
+          const upload = await supabaseClient.storage.from("ticket-attachments").upload(path, attachmentFile, {
+            cacheControl: "3600",
+            upsert: false
+          });
+          if (upload.error) throw upload.error;
+
+          const attachmentInsert = await supabaseClient.from("ticket_attachments").insert({
+            ticket_id: ticketDbId,
+            file_name: attachmentFile.name,
+            storage_path: path,
+            mime_type: attachmentFile.type || "image/*",
+            file_size: attachmentFile.size,
+            uploaded_by: currentUser?.id || null
+          }).select("id").single();
+          if (attachmentInsert.error) throw attachmentInsert.error;
+          attachmentId = attachmentInsert.data.id;
+        }
+
+        const result = await supabaseClient.from("ticket_messages").insert({
+          ticket_id: ticketDbId,
+          author_user_id: currentUser?.id || null,
+          author_name: actor,
+          role: actor === "Admin" ? "admin" : "support",
+          message: text,
+          attachment_id: attachmentId
+        });
+        if (result.error) throw result.error;
+      }
 
       const translations = {
         dashboard: ["لوحة التحكم", "Dashboard"], tickets: ["التذاكر", "Tickets"], employees: ["الموظفون", "Employees"], reports: ["التقارير", "Reports"], settings: ["الإعدادات", "Settings"], guide: ["دليل الاستخدام", "User Guide"], create: ["إنشاء تذكرة", "Create Ticket"],
@@ -525,23 +711,32 @@
           </section>`;
         document.getElementById("backToTickets").addEventListener("click", () => { currentView = "tickets"; render(); });
         document.getElementById("cancelTicketPage").addEventListener("click", () => { currentView = "tickets"; render(); });
-        document.getElementById("ticketPageForm").addEventListener("submit", event => {
+        document.getElementById("ticketPageForm").addEventListener("submit", async event => {
           event.preventDefault();
-          ticket.status = document.getElementById("detailStatusPage").value;
-          ticket.assignee = document.getElementById("detailAssigneePage").value;
-          ticket.closedAt = document.getElementById("detailClosedAtPage").value;
-          currentActor = document.getElementById("ticketActorPage").value;
-          const reply = document.getElementById("ticketReplyPage").value.trim();
-          const replyImage = document.getElementById("ticketReplyAttachmentPage").files[0];
-          if (reply || replyImage) {
-            ticket.messages = ticket.messages || [];
-            const message = { author: currentActor, role: currentActor === "Admin" ? "admin" : "support", text: reply, at: new Date().toISOString() };
-            if (replyImage) message.attachment = { name: replyImage.name, type: replyImage.type || "image/*", size: replyImage.size, url: URL.createObjectURL(replyImage) };
-            ticket.messages.push(message);
+          try {
+            const statusValue = document.getElementById("detailStatusPage").value;
+            const assigneeName = document.getElementById("detailAssigneePage").value;
+            const assignee = employees.find(e => e.name === assigneeName);
+            const closedDate = document.getElementById("detailClosedAtPage").value;
+            currentActor = document.getElementById("ticketActorPage").value;
+            const reply = document.getElementById("ticketReplyPage").value.trim();
+            const replyImage = document.getElementById("ticketReplyAttachmentPage").files[0];
+
+            const update = await supabaseClient.from("tickets").update({
+              status: statusValue,
+              assignee_id: assignee?.id || null,
+              closed_at: closedDate ? new Date(`${closedDate}T00:00:00`).toISOString() : null,
+              updated_at: new Date().toISOString()
+            }).eq("id", ticket.dbId);
+            if (update.error) throw update.error;
+
+            if (reply || replyImage) await addMessage(ticket.dbId, reply, currentActor, replyImage);
+
+            showToast(language === "ar" ? "تم تحديث التذكرة بنجاح." : "Ticket updated successfully.");
+            await refreshAndRender("ticket-detail");
+          } catch (error) {
+            await dbError(error);
           }
-          showToast(language === "ar" ? "تم تحديث التذكرة بنجاح." : "Ticket updated successfully.");
-          renderTicketDetail(document.getElementById("appMain"));
-          lucide.createIcons();
         });
         lucide.createIcons();
       }
@@ -602,15 +797,18 @@
           </table></section>`;
 
         document.getElementById("addEmployeeBtn").addEventListener("click", openEmployeeModal);
-        main.querySelectorAll(".delete-employee").forEach(button => button.addEventListener("click", () => {
-          const employee = employees[Number(button.dataset.index)];
-          if (tickets.some(ticket => ticket.assignee === employee.name)) {
-            showToast(language === "ar" ? "لا يمكن حذف موظف مرتبط بتذاكر حالية." : "This employee is assigned to active tickets.");
-            return;
-          }
-          employees.splice(Number(button.dataset.index), 1);
-          render();
-          showToast(language === "ar" ? "تم حذف الموظف." : "Employee deleted.");
+        main.querySelectorAll(".delete-employee").forEach(button => button.addEventListener("click", async () => {
+          try {
+            const employee = employees[Number(button.dataset.index)];
+            if (tickets.some(ticket => ticket.assigneeId === employee.id && !["Resolved", "Closed"].includes(ticket.status))) {
+              showToast(language === "ar" ? "لا يمكن حذف موظف مرتبط بتذاكر نشطة." : "This employee is assigned to active tickets.");
+              return;
+            }
+            const result = await supabaseClient.from("employees").delete().eq("id", employee.id);
+            if (result.error) throw result.error;
+            await refreshAndRender("employees");
+            showToast(language === "ar" ? "تم حذف الموظف." : "Employee deleted.");
+          } catch (error) { await dbError(error); }
         }));
       }
 
@@ -632,18 +830,21 @@
         const close = () => document.getElementById("modalRoot").innerHTML = "";
         document.getElementById("closeEmployeeModal").addEventListener("click", close);
         document.getElementById("cancelEmployeeModal").addEventListener("click", close);
-        document.getElementById("employeeForm").addEventListener("submit", event => {
+        document.getElementById("employeeForm").addEventListener("submit", async event => {
           event.preventDefault();
-          employees.push({
-            name: document.getElementById("employeeName").value.trim(),
-            email: document.getElementById("employeeEmail").value.trim(),
-            role: document.getElementById("employeeRole").value.trim(),
-            team: document.getElementById("employeeTeam").value.trim(),
-            status: "Active"
-          });
-          close();
-          render();
-          showToast(language === "ar" ? "تمت إضافة الموظف بنجاح." : "Employee added successfully.");
+          try {
+            const result = await supabaseClient.from("employees").insert({
+              name: document.getElementById("employeeName").value.trim(),
+              email: document.getElementById("employeeEmail").value.trim(),
+              role: document.getElementById("employeeRole").value.trim(),
+              team: document.getElementById("employeeTeam").value.trim(),
+              status: "Active"
+            });
+            if (result.error) throw result.error;
+            close();
+            await refreshAndRender("employees");
+            showToast(language === "ar" ? "تمت إضافة الموظف بنجاح." : "Employee added successfully.");
+          } catch (error) { await dbError(error); }
         });
       }
 
@@ -725,37 +926,76 @@
             <div id="shortcutList" class="mt-4 grid gap-2"></div>
           </section>`;
 
-        document.getElementById("saveSettings").addEventListener("click", () => showToast(language === "ar" ? "تم تحديث قواعد SLA." : "SLA rules updated."));
+        document.getElementById("saveSettings").addEventListener("click", async () => {
+          try {
+            const values = {
+              Urgent: Number(document.getElementById("urgentSla").value),
+              High: Number(document.getElementById("highSla").value),
+              Medium: Number(document.getElementById("mediumSla").value),
+              Low: Number(document.getElementById("lowSla").value)
+            };
+            for (const [priority, hours] of Object.entries(values)) {
+              const result = await supabaseClient.from("sla_settings").upsert({ priority, hours }, { onConflict: "priority" });
+              if (result.error) throw result.error;
+            }
+            showToast(language === "ar" ? "تم تحديث قواعد SLA." : "SLA rules updated.");
+          } catch (error) { await dbError(error); }
+        });
 
         function bindList(listId, items, deleteClass) {
           const list = document.getElementById(listId);
           const draw = () => {
             list.innerHTML = items.map((item, index) => `<div class="flex items-center justify-between gap-3 border-b border-slate-100 py-2"><span>${esc(item)}</span><button class="soft-btn ${deleteClass}" data-index="${index}" type="button"><i data-lucide="trash-2"></i> ${language === "ar" ? "حذف" : "Delete"}</button></div>`).join("");
             lucide.createIcons();
-            list.querySelectorAll("." + deleteClass).forEach(button => button.addEventListener("click", () => {
-              items.splice(Number(button.dataset.index), 1);
-              draw();
+            list.querySelectorAll("." + deleteClass).forEach(button => button.addEventListener("click", async () => {
+              try {
+                const index = Number(button.dataset.index);
+                if (deleteClass === "delete-source") {
+                  const row = (await supabaseClient.from("ticket_sources").select("id").eq("name", items[index]).maybeSingle());
+                  if (row.error) throw row.error;
+                  if (row.data) {
+                    const result = await supabaseClient.from("ticket_sources").update({ is_active: false }).eq("id", row.data.id);
+                    if (result.error) throw result.error;
+                  }
+                } else {
+                  const row = (await supabaseClient.from("issue_shortcuts").select("id").eq("label", items[index]).maybeSingle());
+                  if (row.error) throw row.error;
+                  if (row.data) {
+                    const result = await supabaseClient.from("issue_shortcuts").update({ is_active: false }).eq("id", row.data.id);
+                    if (result.error) throw result.error;
+                  }
+                }
+                await refreshAndRender("settings");
+              } catch (error) { await dbError(error); }
             }));
           };
           draw();
         }
 
-        document.getElementById("sourceForm").addEventListener("submit", event => {
+        document.getElementById("sourceForm").addEventListener("submit", async event => {
           event.preventDefault();
-          const input = document.getElementById("sourceInput");
-          if (input.value.trim() && !ticketSources.includes(input.value.trim())) ticketSources.push(input.value.trim());
-          event.target.reset();
-          bindList("sourceList", ticketSources, "delete-source");
-          showToast(language === "ar" ? "تمت إضافة مصدر التذكرة." : "Ticket source added.");
+          try {
+            const name = document.getElementById("sourceInput").value.trim();
+            if (!name || ticketSources.includes(name)) return;
+            const result = await supabaseClient.from("ticket_sources").insert({ name, created_by: currentUser?.id || null });
+            if (result.error) throw result.error;
+            event.target.reset();
+            await refreshAndRender("settings");
+            showToast(language === "ar" ? "تمت إضافة مصدر التذكرة." : "Ticket source added.");
+          } catch (error) { await dbError(error); }
         });
 
-        document.getElementById("shortcutForm").addEventListener("submit", event => {
+        document.getElementById("shortcutForm").addEventListener("submit", async event => {
           event.preventDefault();
-          const input = document.getElementById("shortcutInput");
-          if (input.value.trim() && !issueShortcuts.includes(input.value.trim())) issueShortcuts.push(input.value.trim());
-          event.target.reset();
-          bindList("shortcutList", issueShortcuts, "delete-shortcut");
-          showToast(language === "ar" ? "تمت إضافة اختصار المشكلة." : "Issue shortcut added.");
+          try {
+            const label = document.getElementById("shortcutInput").value.trim();
+            if (!label || issueShortcuts.includes(label)) return;
+            const result = await supabaseClient.from("issue_shortcuts").insert({ label, created_by: currentUser?.id || null });
+            if (result.error) throw result.error;
+            event.target.reset();
+            await refreshAndRender("settings");
+            showToast(language === "ar" ? "تمت إضافة اختصار المشكلة." : "Issue shortcut added.");
+          } catch (error) { await dbError(error); }
         });
 
         bindList("sourceList", ticketSources, "delete-source");
@@ -805,32 +1045,30 @@
           if (event.target.value) document.getElementById("ticketIssue").value = event.target.value;
         });
 
-        document.getElementById("ticketForm").addEventListener("submit", event => {
+        document.getElementById("ticketForm").addEventListener("submit", async event => {
           event.preventDefault();
-          const selectedFiles = Array.from(document.getElementById("ticketAttachments").files || []).map(file => ({
-            name: file.name,
-            type: file.type || "application/octet-stream",
-            size: file.size,
-            url: URL.createObjectURL(file)
-          }));
-          tickets.unshift({
-            id: "TKT-2026-" + String(tickets.length + 1).padStart(6, "0"),
-            customer: document.getElementById("customerName").value.trim(),
-            issue: document.getElementById("ticketIssue").value.trim(),
-            category: "Other",
-            attachments: selectedFiles,
-            priority: document.getElementById("ticketPriority").value,
-            assignee: document.getElementById("ticketAssignee").value,
-            status: "New",
-            createdAt: new Date().toISOString().slice(0, 10),
-            closedAt: "",
-            updated: language === "ar" ? "الآن" : "Now",
-            messages: []
-          });
-          close();
-          currentView = "tickets";
-          render();
-          showToast(language === "ar" ? "تم إنشاء التذكرة بنجاح." : "Ticket created successfully.");
+          try {
+            const assigneeName = document.getElementById("ticketAssignee").value;
+            const assignee = employees.find(e => e.name === assigneeName);
+            const payload = {
+              customer_name: document.getElementById("customerName").value.trim(),
+              issue_summary: document.getElementById("ticketIssue").value.trim(),
+              issue_description: document.getElementById("ticketDescription").value.trim(),
+              category: "Other",
+              source: document.getElementById("ticketSource").value,
+              priority: document.getElementById("ticketPriority").value,
+              assignee_id: assignee?.id || null,
+              status: "New",
+              created_by: currentUser?.id || null
+            };
+            const inserted = await supabaseClient.from("tickets").insert(payload).select("id,ticket_number").single();
+            if (inserted.error) throw inserted.error;
+
+            await uploadTicketFiles(inserted.data.id, document.getElementById("ticketAttachments").files);
+            close();
+            await refreshAndRender("tickets");
+            showToast(language === "ar" ? "تم إنشاء التذكرة بنجاح." : "Ticket created successfully.");
+          } catch (error) { await dbError(error); }
         });
       }
 
@@ -861,7 +1099,14 @@
         render();
       });
 
-      render();
+      (async () => {
+        try {
+          await loadData();
+          render();
+        } catch (error) {
+          await dbError(error);
+        }
+      })();
     })();
   </script>
  
