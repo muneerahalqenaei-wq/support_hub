@@ -506,7 +506,9 @@
       .modal-body { padding: 16px; }
 
       .modal-foot {
-        position: relative;
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
         padding-bottom: max(15px, env(safe-area-inset-bottom));
       }
 
@@ -524,23 +526,18 @@
   <div class="app-shell">
    <aside class="side-nav" id="sidebar">
     <header class="brand">
-     <div class="brand-mark" aria-hidden="true">
-      <i data-lucide="headphones"></i>
+     <div class="brand-mark" aria-hidden="true"><i data-lucide="headphones"></i>
      </div>
-     <div>
-      <strong data-template-id="brand-name" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Customer Service</strong>
+     <div><strong data-template-id="brand-name" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 800; font-style: normal; font-size: 15px;">Customer Service</strong>
       <p data-template-id="brand-subtitle" class="canva-text brand-subtitle" style="color: rgb(227, 243, 238); font-weight: 700; font-style: normal; font-size: 10px; letter-spacing: 0.08rem;">TICKETING DASHBOARD</p>
      </div>
     </header>
-    <nav aria-label="التنقل الرئيسي">
-     <button class="nav-link active" type="button" data-view="dashboard"> <i data-lucide="layout-dashboard"></i> <span data-template-id="nav-dashboard" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">لوحة التحكم</span> </button> <button class="nav-link" type="button" data-view="tickets"> <i data-lucide="ticket"></i> <span data-template-id="nav-tickets" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التذاكر</span> </button> <button class="nav-link" type="button" data-view="employees"> <i data-lucide="users"></i> <span data-template-id="nav-employees" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الموظفون</span> </button> <button class="nav-link" type="button" data-view="reports"> <i data-lucide="chart-no-axes-combined"></i> <span data-template-id="nav-reports" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التقارير</span> </button> <button class="nav-link" type="button" data-view="settings"> <i data-lucide="settings"></i> <span data-template-id="nav-settings" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الإعدادات</span> </button> <button class="nav-link" type="button" data-view="guide"> <i data-lucide="book-open"></i> <span data-template-id="nav-guide" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">دليل الاستخدام</span> </button>
+    <nav aria-label="التنقل الرئيسي"><button class="nav-link active" type="button" data-view="dashboard"> <i data-lucide="layout-dashboard"></i> <span data-template-id="nav-dashboard" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">لوحة التحكم</span> </button> <button class="nav-link" type="button" data-view="tickets"> <i data-lucide="ticket"></i> <span data-template-id="nav-tickets" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التذاكر</span> </button> <button class="nav-link" type="button" data-view="employees"> <i data-lucide="users"></i> <span data-template-id="nav-employees" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الموظفون</span> </button> <button class="nav-link" type="button" data-view="reports"> <i data-lucide="chart-no-axes-combined"></i> <span data-template-id="nav-reports" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التقارير</span> </button> <button class="nav-link" type="button" data-view="settings"> <i data-lucide="settings"></i> <span data-template-id="nav-settings" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الإعدادات</span> </button> <button class="nav-link" type="button" data-view="guide"> <i data-lucide="book-open"></i> <span data-template-id="nav-guide" class="canva-text" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">دليل الاستخدام</span> </button>
     </nav>
    </aside>
    <div class="main-area">
-    <header data-template-id="topbar-section" class="canva-header topbar" style="background: rgb(255, 255, 255);">
-     <button class="soft-btn mobile-menu" id="menuBtn" type="button" aria-label="فتح القائمة"> <i data-lucide="menu"></i> </button>
-     <div class="flex items-center gap-3">
-      <button data-template-id="language-toggle" class="canva-button soft-btn" id="languageToggle" type="button" style="background: rgb(232, 242, 237); color: rgb(33, 111, 103); font-weight: 700; font-style: normal; font-size: 16px;">English</button> <span class="badge status-open">Admin</span>
+    <header data-template-id="topbar-section" class="canva-header topbar" style="background: rgb(255, 255, 255);"><button class="soft-btn mobile-menu" id="menuBtn" type="button" aria-label="فتح القائمة"> <i data-lucide="menu"></i> </button>
+     <div class="flex items-center gap-3"><button data-template-id="language-toggle" class="canva-button soft-btn" id="languageToggle" type="button" style="background: rgb(232, 242, 237); color: rgb(33, 111, 103); font-weight: 700; font-style: normal; font-size: 16px;">English</button> <span class="badge status-open">Admin</span>
      </div><button data-template-id="create-ticket-button" class="canva-button primary-btn" id="createTicketBtn" type="button" style="background: rgb(38, 143, 133); color: rgb(255, 255, 255); font-weight: 700;"> <i data-lucide="plus"></i> <span data-template-id="create-ticket-label" class="canva-text" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 16px;">إنشاء تذكرة</span> </button>
     </header>
     <main class="page-body" id="appMain" aria-live="polite"></main>
