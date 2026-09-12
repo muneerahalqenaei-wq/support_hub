@@ -556,59 +556,8 @@
       let selectedTicketId = "";
       let toastTimer;
 
-      const employees = [
-        { name: "سارة أحمد", email: "sara@example.com", role: "مشرفة دعم", team: "المدفوعات" },
-        { name: "خالد حسن", email: "khaled@example.com", role: "موظف دعم", team: "العملاء" },
-        { name: "نورة عبدالله", email: "noura@example.com", role: "موظفة دعم", team: "الاسترداد" },
-        { name: "مريم علي", email: "maryam@example.com", role: "موظفة دعم", team: "المحافظ" }
-      ];
-
-      let tickets = [
-        {
-          id: "TKT-2026-000001",
-          customer: "شركة المدار للتجارة",
-          issue: "تعذر إتمام عملية الدفع",
-          category: "Payment",
-          priority: "Urgent",
-          assignee: "سارة أحمد",
-          status: "In Progress",
-          createdAt: "2026-09-07",
-          messages: [{ author: "سارة أحمد", text: "تم تصعيد المشكلة إلى فريق المدفوعات وجارٍ التحقق." }]
-        },
-        {
-          id: "TKT-2026-000002",
-          customer: "محمد العتيبي",
-          issue: "لم يصل رمز القسيمة إلى البريد",
-          category: "Coupon",
-          priority: "High",
-          assignee: "خالد حسن",
-          status: "Pending Customer",
-          createdAt: "2026-09-06",
-          messages: [{ author: "Admin", text: "تم طلب صورة من رسالة الخطأ من العميل." }]
-        },
-        {
-          id: "TKT-2026-000003",
-          customer: "متجر نقطة بيع",
-          issue: "طلب استرداد مبلغ مكرر",
-          category: "Refund",
-          priority: "Medium",
-          assignee: "نورة عبدالله",
-          status: "Resolved",
-          createdAt: "2026-09-04",
-          messages: []
-        },
-        {
-          id: "TKT-2026-000004",
-          customer: "ليان القحطاني",
-          issue: "استفسار عن رصيد المحفظة",
-          category: "Wallet",
-          priority: "Low",
-          assignee: "مريم علي",
-          status: "Open",
-          createdAt: "2026-09-08",
-          messages: []
-        }
-      ];
+      const employees = [];
+      let tickets = [];
 
       const ar = {
         dashboard: "لوحة التحكم",
