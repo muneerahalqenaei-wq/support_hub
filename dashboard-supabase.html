@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة تذاكر خدمة العملاء</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal:#268f85; --teal-deep:#176d65; --olive:#769555; --gold:#f19a1a;
+      --paper:#fff; --mist:#f4f8f5; --line:#d9e5dd; --ink:#15241d; --muted:#66766d;
+      --danger:#bc4040;
+    }
+    * { box-sizing:border-box; }
+    html, body { background:var(--mist); }
+    body {
+      width:100%; min-height:100vh; margin:0;
+      color:var(--ink); font-family:"Libre Franklin",Tahoma,sans-serif;
+    }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; }
+    button:disabled { cursor:not-allowed; opacity:.55; }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible {
+      outline:3px solid var(--gold); outline-offset:2px;
+    }
+    .app-wrapper { width:100%; min-height:100vh; display:flex; }
+    .sidebar {
+      width:268px; position:fixed; inset:0 0 0 auto; z-index:30; overflow-y:auto;
+      padding:28px 16px; background:var(--teal); color:#fff; box-shadow:-8px 0 28px rgba(12,54,48,.12);
+      font-family:Tahoma,sans-serif;
+    }
+    .content-area { width:calc(100% - 268px); margin-right:268px; min-height:100vh; }
+    .brand { display:flex; align-items:center; gap:12px; padding:0 10px 28px; }
+    .brand-mark { display:grid; place-items:center; width:43px; height:43px; border-radius:13px; background:var(--gold); color:#1d241d; }
+    .nav-button {
+      width:100%; display:flex; align-items:center; gap:12px; padding:12px 13px; margin-bottom:5px;
+      border:0; border-radius:10px; background:transparent; color:#e5f4f0; text-align:right;
+      transition:background .18s ease,transform .18s ease;
+    }
+    .nav-button:hover,.nav-button.active { background:rgba(255,255,255,.14); color:#fff; }
+    .nav-button.active { box-shadow:inset -3px 0 var(--gold); }
+    .topbar {
+      width:100%; min-height:76px; position:sticky; top:0; z-index:20; display:flex; align-items:center;
+      justify-content:space-between; gap:16px; padding:14px 30px; background:#fff; border-bottom:1px solid var(--line);
+    }
+    .page-content { width:100%; padding:29px 30px 54px; }
+    .page-title { margin:0; font-size:25px; font-weight:800; letter-spacing:-.04em; }
+    .page-subtitle { margin:7px 0 0; color:var(--muted); font-size:13px; line-height:1.7; }
+    .primary-button,.soft-button,.icon-button,.danger-button {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px; border:0; border-radius:10px;
+      padding:10px 15px; font-size:13px; font-weight:700; transition:.18s ease;
+    }
+    .copy-ticket svg,.open-ticket svg,.edit-ticket svg,.restore-ticket svg { width:13px; height:13px; }
+    .primary-button { background:var(--teal); color:#fff; }
+    .primary-button:hover { background:var(--teal-deep); }
+    .soft-button,.icon-button { background:#e8f2ed; color:#216f67; }
+    .soft-button:hover,.icon-button:hover { background:#d7e9df; }
+    .danger-button { background:#fff0f0; color:var(--danger); }
+    .icon-button { padding:5px; width:29px; height:29px; }.icon-button svg { width:14px; height:14px; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:15px; box-shadow:0 5px 18px rgba(19,58,36,.04); }
+    .metrics { display:grid; grid-template-columns:repeat(5,minmax(130px,1fr)); gap:14px; margin-top:24px; }
+    .metric { min-height:112px; padding:17px; border-top:4px solid #c9ddd2; }
+    .metric.gold { border-top-color:var(--gold); }.metric.red { border-top-color:#e55454; }.metric.green { border-top-color:#28a77a; }
+    .metric-label { color:var(--muted); font-size:12px; font-weight:600; }.metric-value { margin-top:9px; font-size:27px; font-weight:800; }
+    .filter-panel { margin-top:22px; padding:17px; }.filter-grid { display:grid; grid-template-columns:2fr 1fr 1fr auto; gap:10px; }
+    .field {
+      width:100%; border:1px solid #cfddd4; border-radius:9px; padding:10px 11px; color:var(--ink);
+      background:#fff; font-size:13px;
+    }
+    .field:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(38,143,133,.13); }
+    .table-panel { margin-top:17px; overflow-x:auto; }.ticket-table { width:100%; min-width:980px; border-collapse:collapse; }
+    .ticket-table th { padding:13px 12px; background:#f7faf8; border-bottom:1px solid var(--line); color:#607067; font-size:11px; text-align:right; white-space:nowrap; }
+    .ticket-table td { padding:14px 12px; border-bottom:1px solid #edf3ef; font-size:12px; vertical-align:middle; }
+    .ticket-table tbody tr:hover td { background:#fbfdfb; }
+    .ticket-number { color:var(--teal); font-weight:800; direction:ltr; display:inline-block; }.summary-text { max-width:230px; color:#273b32; line-height:1.65; }
+    .badge { display:inline-flex; align-items:center; padding:4px 9px; border-radius:999px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .status-new { background:#e5efff; color:#195bad; }.status-open { background:#ecf2f8; color:#42617d; }.status-progress { background:#fff5d9; color:#966600; }
+    .status-pending { background:#f4edff; color:#7651a9; }.status-resolved { background:#dcf8ed; color:#16845e; }.status-closed { background:#e9edf1; color:#596779; }
+    .form-panel { max-width:950px; margin:20px auto 0; padding:22px; }.form-grid,.details-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .full-field { grid-column:1 / -1; }.field-label { display:block; margin-bottom:7px; color:#53655a; font-size:11px; font-weight:800; }
+    .section-heading { margin:0; font-size:16px; font-weight:800; }.detail-box { min-height:43px; padding:10px 11px; border:1px solid #cfddd4; border-radius:9px; background:#f9fbfa; font-size:13px; }
+    .notice { margin-top:15px; padding:12px 14px; border-radius:10px; background:#fff7e6; color:#87560b; font-size:12px; line-height:1.7; }
+    .settings-list { display:grid; gap:8px; margin-top:16px; }.list-row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid #edf3ef; }
+    .staff-card { padding:18px; border-top:4px solid #c9ddd2; }.staff-avatar { width:43px; height:43px; display:grid; place-items:center; border-radius:50%; background:#e8f2ed; color:var(--teal); font-weight:800; }
+    .bar-track { height:10px; overflow:hidden; border-radius:999px; background:#e8f2ed; }.bar-fill { height:100%; border-radius:999px; background:var(--teal); }
+    .note-bubble { border-right:4px solid var(--teal); background:#e8f5f1; }.note-bubble.author-admin { border-right-color:#268f85; background:#e8f5f1; }.note-bubble.author-sara { border-right-color:#6f8f3f; background:#f1f6e8; }.note-bubble.author-khaled { border-right-color:#d18416; background:#fff5e4; }.note-bubble.author-reem { border-right-color:#6b72ad; background:#eef0fb; }.audit-bubble { border-right-color:var(--gold); background:#fff8e9; }
+    .attachment-item { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px; border:1px solid #dbe8e1; border-radius:10px; background:#fbfdfb; }
+    .attachment-name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .unread-replies { display:inline-flex; align-items:center; gap:5px; margin-top:5px; padding:3px 8px; border-radius:999px; background:#fff5d9; color:#87560b; font-size:10px; font-weight:700; white-space:nowrap; }
+    .notification-button { position:relative; width:40px; height:40px; padding:0; border:1px solid #d9e5dd; border-radius:10px; background:#fff; color:var(--teal); display:inline-flex; align-items:center; justify-content:center; }
+    .notification-button:hover { background:#e8f2ed; }
+    .notification-count { position:absolute; top:-6px; left:-6px; min-width:19px; height:19px; padding:0 5px; border-radius:999px; background:#bc4040; color:#fff; font-size:10px; font-weight:800; display:none; align-items:center; justify-content:center; border:2px solid #fff; }
+    .notification-count.visible { display:inline-flex; }
+    .conversation-modal { position:fixed; inset:0; z-index:60; display:grid; place-items:center; padding:20px; background:rgba(21,36,29,.42); }
+    .conversation-dialog { width:min(680px,100%); max-height:88vh; overflow:auto; padding:22px; }
+    .conversation-dialog[hidden] { display:none; }
+    .loading-overlay { position:fixed; inset:0; z-index:80; display:grid; place-items:center; background:rgba(244,248,245,.85); }
+    .loading-overlay[hidden] { display:none; }
+    .toast {
+      position:fixed; top:22px; left:50%; z-index:70; width:min(760px,calc(100% - 32px)); padding:15px 20px;
+      border-radius:10px; background:var(--teal); border-right:4px solid var(--gold); color:#fff; box-shadow:0 10px 28px rgba(0,0,0,.2);
+      font-size:13px; text-align:center; transform:translate(-50%,-140px); opacity:0; transition:.22s ease;
+    }
+    .toast.show { transform:translate(-50%,0); opacity:1; }
+    .toast.success { background:#dcf8ed; border-right-color:#28a77a; color:#176d65; }
+    .toast.warning { background:#fff5d9; border-right-color:#f6c453; color:#87560b; }
+    .toast.error { background:#fff0f0; border-right-color:#ff8b8b; color:#9f3030; }
+    @media (max-width:1050px) { .metrics { grid-template-columns:repeat(2,minmax(130px,1fr)); }.filter-grid { grid-template-columns:1fr 1fr; } }
+    @media (max-width:760px) {
+      .sidebar { transform:translateX(100%); transition:transform .2s ease; }.sidebar.open { transform:translateX(0); }
+      .content-area { width:100%; margin-right:0; }.topbar { padding:13px 16px; }.page-content { padding:21px 15px 40px; }
+      .mobile-menu { display:inline-flex!important; }.form-grid,.details-grid,.filter-grid { grid-template-columns:1fr; }.full-field { grid-column:auto; }.page-title { font-size:21px; }
+    }
+    @media (min-width:761px) { .mobile-menu { display:none; } }
+  </style>
+ </head>
+ <body>
+  <div class="app-wrapper">
+   <aside class="sidebar" id="sidebar">
+    <header class="brand">
+     <div class="brand-mark" aria-hidden="true"><i data-lucide="headphones"></i></div>
+     <div><strong>خدمة العملاء</strong>
+      <p class="m-0 mt-1 text-[10px] tracking-[.12em] text-emerald-100">TICKETING DASHBOARD</p>
+     </div>
+    </header>
+    <nav aria-label="التنقل الرئيسي">
+     <button class="nav-button active" type="button" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span>لوحة التحكم</span></button>
+     <button class="nav-button" type="button" data-view="tickets"><i data-lucide="ticket"></i><span>التذاكر</span></button>
+     <button class="nav-button" type="button" data-view="staff"><i data-lucide="users"></i><span>الموظفون</span></button>
+     <button class="nav-button" type="button" data-view="archive"><i data-lucide="archive"></i><span>الأرشيف</span></button>
+     <button class="nav-button" type="button" data-view="reports"><i data-lucide="bar-chart-3"></i><span>التقارير</span></button>
+     <button class="nav-button" type="button" data-view="guide"><i data-lucide="book-open-check"></i><span>دليل الاستخدام</span></button>
+     <button class="nav-button" type="button" data-view="settings"><i data-lucide="settings"></i><span>الإعدادات</span></button>
+    </nav>
+   </aside>
+   <div class="content-area">
+    <header class="topbar">
+     <div class="flex items-center gap-3">
+      <button class="soft-button mobile-menu" id="menuButton" type="button" aria-label="فتح القائمة"><i data-lucide="menu"></i></button>
+      <span class="badge status-open">ADMIN</span>
+     </div>
+     <div class="flex items-center gap-3">
+      <button class="notification-button" id="unreadNotifications" type="button" aria-label="فتح سجل الرسائل غير المقروءة" title="الرسائل غير المقروءة"><i data-lucide="bell"></i><span class="notification-count" id="unreadNotificationCount" aria-live="polite"></span></button>
+      <button class="primary-button" id="createTicketButton" type="button"><i data-lucide="plus"></i><span>إنشاء تذكرة</span></button>
+     </div>
+    </header>
+    <main class="page-content" id="appMain" aria-live="polite"></main>
+   </div>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
+  <div id="loadingOverlay" class="loading-overlay" hidden>
+    <div class="panel p-6 text-center"><p class="page-subtitle m-0">جاري الاتصال بقاعدة البيانات...</p></div>
+  </div>
+  <div id="conversationModal" class="conversation-modal" hidden role="dialog" aria-modal="true" aria-labelledby="conversationTitle">
+   <div class="conversation-dialog panel">
+    <div class="flex items-center justify-between gap-3">
+     <h2 id="conversationTitle" class="section-heading">سجل الردود الداخلية</h2>
+     <button id="closeConversation" class="icon-button" type="button" aria-label="إغلاق سجل الردود"><i data-lucide="x"></i></button>
+    </div>
+    <div id="conversationContent" class="mt-4"></div>
+   </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // إعدادات الاتصال بـ Supabase — عدّل هذين السطرين ببيانات مشروعك
+    // (Project Settings > API داخل لوحة Supabase)
+    // ============================================================
+    const SUPABASE_URL = "https://eojlplddbjodknseubva.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_No1R26-FkTL-YAuAykugtA_k0BxK39f";
+    const ATTACHMENTS_BUCKET = "ticket-attachments";
+
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (() => {
+      let tickets = [];
+      let staff = [];
+      let sources = [];
+      let shortcuts = [];
+      let selectedTicketId = "";
+      let toastTimer;
+      const appMain = document.getElementById("appMain");
+
+      const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+      const dateText = iso => iso ? new Intl.DateTimeFormat("ar-SA",{dateStyle:"medium",timeStyle:"short"}).format(new Date(iso)) : "—";
+      const statusLabel = status => ({"New":"جديدة","In Progress":"قيد المعالجة","Pending Customer":"بانتظار العميل","Pending Technical":"بانتظار الفريق التقني","Open":"مفتوحة","Closed":"مغلقة"}[status] || status);
+      const statusClass = status => ({"New":"status-new","Open":"status-open","In Progress":"status-progress","Pending Customer":"status-pending","Pending Technical":"status-pending","Closed":"status-closed"}[status] || "status-open");
+      const authorClass = author => ({"الإدارة":"author-admin","سارة أحمد":"author-sara","خالد علي":"author-khaled","ريم صالح":"author-reem"}[author] || "author-admin");
+      const header = (title, subtitle) => `<section><h1 class="page-title">${title}</h1><p class="page-subtitle">${subtitle}</p></section>`;
+      const now = () => new Date().toISOString();
+      const allowedStatuses = {
+        "New":["In Progress","Open","Pending Customer","Pending Technical","Closed"],
+        "In Progress":["Pending Customer","Pending Technical","Open","Closed"],
+        "Pending Customer":["In Progress","Pending Technical","Open","Closed"],
+        "Pending Technical":["In Progress","Pending Customer","Open","Closed"],
+        "Open":["In Progress","Pending Customer","Pending Technical","Closed"],
+        "Closed":[]
+      };
+
+      function refreshIcons() { lucide.createIcons(); }
+
+      function updateUnreadIndicator() {
+        const count = tickets.reduce((total, ticket) => total + Number(ticket.unreadReplies || 0), 0);
+        const badge = document.getElementById("unreadNotificationCount");
+        const button = document.getElementById("unreadNotifications");
+        if (!badge || !button) return;
+        badge.textContent = count > 99 ? "99+" : String(count);
+        badge.classList.toggle("visible", count > 0);
+        button.setAttribute("aria-label", count ? `فتح سجل الرسائل غير المقروءة (${count})` : "فتح سجل الرسائل غير المقروءة");
+      }
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.classList.remove("success", "warning", "error");
+        toast.classList.add(type, "show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+      }
+
+      function setLoading(isLoading) {
+        document.getElementById("loadingOverlay").hidden = !isLoading;
+      }
+
+      // ============================================================
+      // طبقة الاتصال بـ Supabase
+      // ============================================================
+      function attachmentUrl(storagePath) {
+        const { data } = supabaseClient.storage.from(ATTACHMENTS_BUCKET).getPublicUrl(storagePath);
+        return data?.publicUrl || "";
+      }
+
+      function mapAttachmentRow(row) {
+        return { id: row.id, name: row.name, size: row.size, type: row.type, storagePath: row.storage_path, url: attachmentUrl(row.storage_path) };
+      }
+
+      async function uploadPendingFile(pendingFile, ticketId) {
+        const path = `${ticketId}/${Date.now()}-${Math.random().toString(36).slice(2,7)}-${pendingFile.file.name}`;
+        const { error } = await supabaseClient.storage.from(ATTACHMENTS_BUCKET).upload(path, pendingFile.file);
+        if (error) throw error;
+        return { name: pendingFile.file.name, size: pendingFile.file.size, type: pendingFile.file.type, storagePath: path };
+      }
+
+      async function loadStaff() {
+        const { data, error } = await supabaseClient.from("staff").select("*").order("id");
+        if (error) { showToast("تعذر تحميل بيانات الموظفين.", "error"); return; }
+        staff = data || [];
+      }
+
+      async function loadSources() {
+        const { data, error } = await supabaseClient.from("settings_sources").select("*").order("id");
+        if (error) { showToast("تعذر تحميل مصادر التذاكر.", "error"); return; }
+        sources = (data || []).map(row => row.value);
+      }
+
+      async function loadShortcuts() {
+        const { data, error } = await supabaseClient.from("settings_shortcuts").select("*").order("id");
+        if (error) { showToast("تعذر تحميل الملخصات.", "error"); return; }
+        shortcuts = (data || []).map(row => row.value);
+      }
+
+      async function loadTickets() {
+        const { data, error } = await supabaseClient
+          .from("tickets")
+          .select("*, ticket_messages(*), ticket_audit(*), ticket_attachments(*)")
+          .order("created_at", { ascending: false });
+        if (error) { showToast("تعذر تحميل التذاكر من قاعدة البيانات.", "error"); tickets = []; return; }
+        tickets = (data || []).map(row => {
+          const allAttachments = row.ticket_attachments || [];
+          const messages = (row.ticket_messages || [])
+            .slice()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .map(m => ({
+              id: m.id, author: m.author, text: m.text_content, at: m.created_at,
+              attachments: allAttachments.filter(a => a.message_id === m.id).map(mapAttachmentRow)
+            }));
+          const audit = (row.ticket_audit || [])
+            .slice()
+            .sort((a, b) => new Date(b.at) - new Date(a.at))
+            .map(a => ({ author: a.author, change: a.change, from: a.from_value, to: a.to_value, at: a.at }));
+          const attachments = allAttachments.filter(a => a.message_id === null).map(mapAttachmentRow);
+          return {
+            id: row.id, customerId: row.customer_id, customer: row.customer_name, account: row.account,
+            phone: row.phone, source: row.source, summary: row.summary, description: row.description,
+            assignee: row.assignee, status: row.status, priority: row.priority,
+            createdAt: row.created_at ? row.created_at.slice(0, 10) : "",
+            finalReply: row.final_reply || "", finalReplyUpdatedAt: row.final_reply_updated_at || "",
+            unreadReplies: row.unread_replies || 0, messages, audit, attachments
+          };
+        });
+      }
+
+      async function loadAll() {
+        setLoading(true);
+        await Promise.all([loadStaff(), loadSources(), loadShortcuts(), loadTickets()]);
+        setLoading(false);
+      }
+
+      function attachmentMarkup(attachment, removable = false, index = 0) {
+        const size = attachment.size ? `${Math.ceil(attachment.size / 1024)} KB` : "ملف مرفق";
+        return `<div class="attachment-item">
+          <div class="min-w-0 flex items-center gap-2">
+            <i data-lucide="paperclip" class="shrink-0 text-emerald-700"></i>
+            <div class="min-w-0"><strong class="attachment-name block text-xs">${esc(attachment.name)}</strong><span class="text-[11px] text-slate-500">${esc(size)}</span></div>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            ${attachment.url ? `<a class="icon-button" href="${attachment.url}" download="${esc(attachment.name)}" target="_blank" rel="noopener noreferrer" aria-label="فتح أو تنزيل ${esc(attachment.name)}"><i data-lucide="download"></i></a>` : ""}
+            ${removable ? `<button class="icon-button remove-pending-file" type="button" data-index="${index}" aria-label="حذف الملف ${esc(attachment.name)}"><i data-lucide="x"></i></button>` : ""}
+          </div>
+        </div>`;
+      }
+
+      function renderDashboard() {
+        const active = tickets.filter(t => t.status !== "Closed");
+        const open = tickets.filter(t => t.status === "Open").length;
+        const progress = tickets.filter(t => t.status === "In Progress").length;
+        const urgent = tickets.filter(t => ["Urgent","High"].includes(t.priority)).length;
+        const resolved = tickets.filter(t => t.status === "Resolved").length;
+
+        appMain.innerHTML = `
+          ${header("لوحة التحكم","متابعة سريعة لتذاكر خدمة العملاء وحالة الفريق")}
+          <section class="metrics">
+            <article class="panel metric"><div class="metric-label">التذاكر النشطة</div><div class="metric-value">${active.length}</div></article>
+            <article class="panel metric"><div class="metric-label">تذاكر مفتوحة</div><div class="metric-value">${open}</div></article>
+            <article class="panel metric gold"><div class="metric-label">قيد المعالجة</div><div class="metric-value">${progress}</div></article>
+            <article class="panel metric red"><div class="metric-label">عالية الأولوية</div><div class="metric-value">${urgent}</div></article>
+            <article class="panel metric green"><div class="metric-label">تم حلها</div><div class="metric-value">${resolved}</div></article>
+          </section>
+          <section class="grid lg:grid-cols-3 gap-5 mt-5">
+            <article class="panel lg:col-span-2 p-5">
+              <div class="flex items-center justify-between gap-4">
+                <div><h2 class="section-heading">آخر التذاكر</h2><p class="page-subtitle">اضغط على أي تذكرة لعرض تفاصيلها.</p></div>
+                <button class="soft-button" id="openAllTickets" type="button"><i data-lucide="arrow-left"></i> عرض الكل</button>
+              </div>
+              <div class="mt-4 grid gap-2">
+                ${active.slice(0,4).map(t => `
+                  <div class="flex items-center justify-between gap-3 rounded-lg border border-emerald-50 p-3 hover:bg-emerald-50">
+                    <button type="button" class="ticket-detail-button min-w-0 flex-1 text-right" data-ticket-id="${t.id}">
+                      <strong class="ticket-number">${t.id}</strong>
+                    </button>
+                    <span class="badge ${statusClass(t.status)}">${statusLabel(t.status)}</span>
+                  </div>`).join("")}
+              </div>
+            </article>
+            <article class="panel p-5">
+              <h2 class="section-heading">الفريق المتاح</h2><p class="page-subtitle">الموظفون المسجلون حالياً.</p>
+              <div class="mt-4 grid gap-3">${staff.slice(0,3).map(member => `
+                <div class="flex items-center gap-3"><div class="staff-avatar">${esc(member.name.charAt(0))}</div>
+                <div class="min-w-0"><strong class="block text-sm">${esc(member.name)}</strong><span class="text-xs text-slate-500">${esc(member.status)}</span></div></div>`).join("")}</div>
+              <button class="soft-button mt-5 w-full" id="openStaff" type="button">إدارة الموظفين</button>
+            </article>
+          </section>`;
+
+        document.getElementById("openAllTickets").addEventListener("click", () => navigate("tickets"));
+        document.getElementById("openStaff").addEventListener("click", () => navigate("staff"));
+        appMain.querySelectorAll(".ticket-detail-button").forEach(button => button.addEventListener("click", () => openTicket(button.dataset.ticketId)));
+        refreshIcons();
+      }
+
+      function ticketTable(items, archiveMode = false) {
+        return `<section class="panel table-panel"><table class="ticket-table">
+          <thead><tr><th>رقم التذكرة</th><th>العميل</th><th>رقم الجوال</th><th>الحساب</th><th>المصدر</th><th>الوصف المختصر</th><th>الموظف</th><th>الحالة</th><th>الإجراءات</th></tr></thead>
+          <tbody>${items.length ? items.map(t => `<tr>
+            <td><div class="flex items-center gap-1"><span class="ticket-number">${t.id}</span><button type="button" class="icon-button copy-ticket" data-ticket-id="${t.id}" aria-label="نسخ رقم التذكرة ${t.id}"><i data-lucide="copy"></i></button></div></td>
+            <td class="font-bold">${esc(t.customer)}${t.unreadReplies ? `<span class="unread-replies"><i data-lucide="message-circle"></i>${t.unreadReplies} ${t.unreadReplies === 1 ? "رد غير مقروء" : "ردود غير مقروءة"}</span>` : ""}</td><td dir="ltr">${esc(t.phone || "—")}</td><td dir="ltr">${esc(t.account)}</td><td>${esc(t.source)}</td><td class="summary-text">${esc(t.summary || t.description || "—")}</td>
+            <td>${esc(t.assignee)}</td>
+            <td><span class="badge ${statusClass(t.status)}">${statusLabel(t.status)}</span></td>
+            <td><div class="flex gap-1">
+              <button class="icon-button ${archiveMode ? "restore-ticket" : "open-ticket"}" data-ticket-id="${t.id}" type="button" aria-label="${archiveMode ? "استعادة التذكرة" : "عرض التفاصيل"}"><i data-lucide="${archiveMode ? "rotate-ccw" : "eye"}"></i></button>
+              ${!archiveMode && t.status !== "Closed" ? `<button class="icon-button edit-ticket" data-ticket-id="${t.id}" type="button" aria-label="تعديل التذكرة ${t.id}"><i data-lucide="edit-3"></i></button>` : ""}
+              ${!archiveMode && t.status === "New" ? `<button class="icon-button delete-ticket" data-ticket-id="${t.id}" type="button" aria-label="حذف التذكرة الجديدة ${t.id}"><i data-lucide="trash-2"></i></button>` : ""}
+            </div></td>
+          </tr>`).join("") : `<tr><td colspan="9" class="p-9 text-center text-slate-500">لا توجد تذاكر لعرضها.</td></tr>`}</tbody>
+        </table></section>`;
+      }
+
+      function bindTableActions(host) {
+        host.querySelectorAll(".copy-ticket").forEach(button => button.addEventListener("click", () => copyTicketNumber(button.dataset.ticketId)));
+        host.querySelectorAll(".open-ticket").forEach(button => button.addEventListener("click", () => openTicket(button.dataset.ticketId)));
+        host.querySelectorAll(".edit-ticket").forEach(button => {
+          button.addEventListener("click", () => renderTicketForm(tickets.find(t => t.id === button.dataset.ticketId)));
+        });
+        host.querySelectorAll(".delete-ticket").forEach(button => {
+          button.addEventListener("click", async () => {
+            const ticket = tickets.find(t => t.id === button.dataset.ticketId);
+            if (!ticket || ticket.status !== "New") return;
+            button.disabled = true;
+            try {
+              const { error } = await supabaseClient.from("tickets").delete().eq("id", ticket.id);
+              if (error) throw error;
+              await loadTickets();
+              renderTickets();
+              showToast("تم حذف التذكرة الجديدة.");
+            } catch { showToast("تعذر حذف التذكرة.", "error"); button.disabled = false; }
+          });
+        });
+        host.querySelectorAll(".restore-ticket").forEach(button => {
+          button.addEventListener("click", async () => {
+            const ticket = tickets.find(t => t.id === button.dataset.ticketId);
+            button.disabled = true;
+            try {
+              const { error: updateError } = await supabaseClient.from("tickets").update({ status: "Open" }).eq("id", ticket.id);
+              if (updateError) throw updateError;
+              await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author: "الإدارة", change: "تمت استعادة التذكرة", from_value: "مغلقة", to_value: "مفتوحة" });
+              await loadTickets();
+              renderArchive();
+              showToast("تمت استعادة التذكرة إلى قائمة التذاكر.");
+            } catch { showToast("تعذر استعادة التذكرة.", "error"); button.disabled = false; }
+          });
+        });
+      }
+
+      function renderTickets() {
+        appMain.innerHTML = `${header("كل التذاكر","اعرض بيانات العميل ومصدر التذكرة وملخص المشكلة، مع البحث والتصفية والتصدير.")}
+          <section class="panel filter-panel"><div class="filter-grid">
+            <div><label class="sr-only" for="ticketSearch">بحث في التذاكر</label><input id="ticketSearch" class="field" placeholder="بحث برقم التذكرة أو العميل أو الحساب أو الملخص"></div>
+            <div><label class="sr-only" for="statusFilter">تصفية الحالة</label><select id="statusFilter" class="field"><option value="">كل الحالات</option>${["New","In Progress","Pending Customer","Pending Technical","Open"].map(s=>`<option value="${s}">${statusLabel(s)}</option>`).join("")}</select></div>
+            <div><label class="sr-only" for="sourceFilter">تصفية المصدر</label><select id="sourceFilter" class="field"><option value="">كل المصادر</option>${sources.map(s=>`<option value="${esc(s)}">${esc(s)}</option>`).join("")}</select></div>
+            <button class="primary-button" id="exportButton" type="button"><i data-lucide="download"></i> تصدير Excel</button>
+          </div></section><div id="ticketTableSlot"></div>`;
+
+        const search = document.getElementById("ticketSearch");
+        const status = document.getElementById("statusFilter");
+        const source = document.getElementById("sourceFilter");
+        let currentPage = 1;
+        const pageSize = 10;
+
+        function draw() {
+          const query = search.value.trim().toLowerCase();
+          const matches = tickets.filter(t => t.status !== "Closed" &&
+            (!query || [t.id,t.customerId,t.customer,t.account,t.source,t.summary,t.description,t.assignee].join(" ").toLowerCase().includes(query)) &&
+            (!status.value || t.status === status.value) &&
+            (!source.value || t.source === source.value));
+          const pageCount = Math.max(1, Math.ceil(matches.length / pageSize));
+          currentPage = Math.min(currentPage, pageCount);
+          const pageItems = matches.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+          const slot = document.getElementById("ticketTableSlot");
+          slot.innerHTML = ticketTable(pageItems) + `<div class="flex items-center justify-between gap-3 mt-4 flex-wrap"><span class="page-subtitle">صفحة ${currentPage} من ${pageCount} — ${matches.length} تذكرة</span><div class="flex gap-2"><button class="soft-button" id="previousPage" type="button" ${currentPage === 1 ? "disabled" : ""}>السابق</button><button class="soft-button" id="nextPage" type="button" ${currentPage === pageCount ? "disabled" : ""}>التالي</button></div></div>`;
+          bindTableActions(slot);
+          document.getElementById("previousPage").addEventListener("click", () => { currentPage--; draw(); });
+          document.getElementById("nextPage").addEventListener("click", () => { currentPage++; draw(); });
+          refreshIcons();
+        }
+
+        [search,status,source].forEach(control => control.addEventListener(control === search ? "input" : "change", () => { currentPage = 1; draw(); }));
+        document.getElementById("exportButton").addEventListener("click", () => exportTicketsExcel(tickets.filter(t => t.status !== "Closed")));
+        draw();
+      }
+
+      function renderTicketForm(ticket = null) {
+        if (ticket?.status === "Closed") {
+          showToast("لا يمكن تعديل التذكرة المغلقة.", "warning");
+          navigate("archive");
+          return;
+        }
+
+        const editing = Boolean(ticket);
+        let pendingFiles = [];
+        appMain.innerHTML = `
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            ${header(editing ? "تعديل التذكرة" : "إنشاء تذكرة", editing ? "حدّث بيانات العميل وبيانات التذكرة." : "أدخل بيانات العميل وتفاصيل المشكلة وأرفق الملفات عند الحاجة.")}
+            <button class="soft-button" id="backToTickets" type="button"><i data-lucide="arrow-right"></i> العودة للتذاكر</button>
+          </div>
+          <form class="panel form-panel" id="ticketForm">
+            <div class="form-grid">
+              <div><label class="field-label" for="customerId">رقم العميل المسجل بالتطبيق *</label><input id="customerId" class="field" value="${esc(ticket?.customerId || "")}" required></div>
+              <div><label class="field-label" for="customerName">اسم العميل *</label><input id="customerName" class="field" value="${esc(ticket?.customer || "")}" required></div>
+              <div><label class="field-label" for="customerPhone">رقم جوال العميل</label><input id="customerPhone" class="field" type="tel" dir="ltr" value="${esc(ticket?.phone || "")}"></div>
+              <div><label class="field-label" for="customerAccount">حساب العميل *</label><input id="customerAccount" class="field" dir="ltr" value="${esc(ticket?.account || "")}" required></div>
+              <div><label class="field-label" for="ticketSource">مصدر التذكرة *</label><select id="ticketSource" class="field" required><option value="">اختر المصدر</option>${sources.map(s => `<option value="${esc(s)}" ${ticket?.source === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></div>
+              <div><label class="field-label" for="ticketSummary">الوصف المختصر للمشكلة</label><select id="ticketSummary" class="field"><option value="">اختر وصفاً مختصراً</option>${shortcuts.map(s => `<option value="${esc(s)}" ${ticket?.summary === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></div>
+              <div class="full-field"><label class="field-label" for="ticketDescription">الوصف التفصيلي للمشكلة</label><textarea id="ticketDescription" class="field min-h-32">${esc(ticket?.description || "")}</textarea></div>
+              <div><label class="field-label" for="ticketAssignee">الموظف المسؤول</label><select id="ticketAssignee" class="field">${staff.map(s => `<option value="${esc(s.name)}" ${ticket?.assignee === s.name ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>
+              <div><label class="field-label" for="ticketPriority">الأولوية</label><select id="ticketPriority" class="field">${["Low","Medium","High","Urgent"].map(p => `<option value="${p}" ${ticket?.priority === p || (!ticket && p === "Medium") ? "selected" : ""}>${({Low:"منخفضة",Medium:"متوسطة",High:"عالية",Urgent:"عاجلة"})[p]}</option>`).join("")}</select></div>
+              <div class="full-field"><label class="field-label" for="ticketFiles">مرفقات التذكرة</label><input id="ticketFiles" class="field" type="file" multiple><p class="page-subtitle">يمكن تحديد أكثر من ملف وحذف أي ملف قبل حفظ التذكرة. تُرفع الملفات إلى Supabase Storage عند الحفظ.</p><div id="pendingFiles" class="settings-list"></div></div>
+            </div>
+            <div class="mt-5 flex gap-2 flex-wrap"><button class="primary-button" id="saveTicketButton" type="submit"><i data-lucide="save"></i> ${editing ? "حفظ التعديلات" : "إنشاء التذكرة"}</button><button class="soft-button" id="cancelForm" type="button">إلغاء</button></div>
+          </form>`;
+
+        const back = () => navigate("tickets");
+        const drawPending = () => {
+          const host = document.getElementById("pendingFiles");
+          host.innerHTML = pendingFiles.length ? pendingFiles.map((file,index) => attachmentMarkup(file,true,index)).join("") : "";
+          host.querySelectorAll(".remove-pending-file").forEach(button => button.addEventListener("click", () => {
+            const removed = pendingFiles.splice(Number(button.dataset.index),1)[0];
+            if (removed?.url) URL.revokeObjectURL(removed.url);
+            drawPending();
+          }));
+          refreshIcons();
+        };
+
+        document.getElementById("backToTickets").addEventListener("click", back);
+        document.getElementById("cancelForm").addEventListener("click", back);
+        document.getElementById("ticketFiles").addEventListener("change", event => {
+          pendingFiles.push(...[...event.target.files].map(file => ({name:file.name,size:file.size,type:file.type,url:URL.createObjectURL(file),file})));
+          event.target.value = "";
+          drawPending();
+        });
+
+        document.getElementById("ticketForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          const saveButton = document.getElementById("saveTicketButton");
+          saveButton.disabled = true;
+
+          const values = {
+            customerId:document.getElementById("customerId").value.trim(),
+            customer:document.getElementById("customerName").value.trim(),
+            phone:document.getElementById("customerPhone").value.trim(),
+            account:document.getElementById("customerAccount").value.trim(),
+            source:document.getElementById("ticketSource").value,
+            summary:document.getElementById("ticketSummary").value,
+            description:document.getElementById("ticketDescription").value.trim(),
+            assignee:document.getElementById("ticketAssignee").value,
+            priority:document.getElementById("ticketPriority").value
+          };
+
+          try {
+            if (editing) {
+              const changes = Object.entries(values).filter(([key,value]) => ticket[key] !== value);
+              if (changes.length) {
+                const { error } = await supabaseClient.from("tickets").update({
+                  customer_id: values.customerId, customer_name: values.customer, account: values.account,
+                  phone: values.phone, source: values.source, summary: values.summary, description: values.description,
+                  assignee: values.assignee, priority: values.priority
+                }).eq("id", ticket.id);
+                if (error) throw error;
+                const fieldLabels = {customer:"اسم العميل",account:"الحساب",source:"المصدر",summary:"الملخص",description:"الوصف",assignee:"الموظف المسؤول",priority:"الأولوية",customerId:"رقم العميل",phone:"رقم الجوال"};
+                for (const [key,value] of changes) {
+                  await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author:"الإدارة", change:`تعديل ${fieldLabels[key]||key}`, from_value: ticket[key] || "—", to_value: value || "—" });
+                }
+              }
+              if (pendingFiles.length) {
+                for (const pf of pendingFiles) {
+                  const uploaded = await uploadPendingFile(pf, ticket.id);
+                  await supabaseClient.from("ticket_attachments").insert({ ticket_id: ticket.id, name: uploaded.name, size: uploaded.size, type: uploaded.type, storage_path: uploaded.storagePath });
+                }
+                await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author:"الإدارة", change:"إضافة مرفقات", from_value:"—", to_value:`${pendingFiles.length} ملف` });
+              }
+              showToast("تم حفظ تعديلات التذكرة بنجاح.");
+              selectedTicketId = ticket.id;
+              await loadTickets();
+              navigate("details");
+            } else {
+              const { data: inserted, error } = await supabaseClient.from("tickets").insert({
+                customer_id: values.customerId, customer_name: values.customer, account: values.account,
+                phone: values.phone, source: values.source, summary: values.summary, description: values.description,
+                assignee: values.assignee, priority: values.priority, status: "New"
+              }).select().single();
+              if (error) throw error;
+              const id = inserted.id;
+              await supabaseClient.from("ticket_audit").insert({ ticket_id: id, author:"الإدارة", change:"تم إنشاء التذكرة", from_value:"—", to_value:"جديدة" });
+              if (pendingFiles.length) {
+                for (const pf of pendingFiles) {
+                  const uploaded = await uploadPendingFile(pf, id);
+                  await supabaseClient.from("ticket_attachments").insert({ ticket_id: id, name: uploaded.name, size: uploaded.size, type: uploaded.type, storage_path: uploaded.storagePath });
+                }
+                await supabaseClient.from("ticket_audit").insert({ ticket_id: id, author:"الإدارة", change:"إضافة مرفقات عند الإنشاء", from_value:"—", to_value:`${pendingFiles.length} ملف` });
+              }
+              selectedTicketId = id;
+              await loadTickets();
+              showToast("تمت إضافة التذكرة بنجاح", "success");
+              navigate("tickets");
+            }
+          } catch (err) {
+            console.error(err);
+            showToast("تعذر حفظ التذكرة. تحقق من الاتصال بقاعدة البيانات.", "error");
+            saveButton.disabled = false;
+          }
+        });
+        refreshIcons();
+      }
+
+      function renderDetails() {
+        const ticket = tickets.find(t => t.id === selectedTicketId);
+        if (!ticket) return navigate("tickets");
+        const options = allowedStatuses[ticket.status] || [];
+
+        appMain.innerHTML = `
+          <div class="flex items-start justify-between gap-4 flex-wrap">
+            ${header(`تفاصيل التذكرة ${ticket.id}`,"راجع معلومات العميل وأضف الردود الداخلية والرد النهائي المعتمد.")}
+            <div class="flex gap-2 flex-wrap">
+              ${ticket.status !== "Closed" ? `<button class="primary-button" id="editTicket" type="button"><i data-lucide="edit"></i> تعديل</button>` : ""}
+              <button class="soft-button" id="backFromDetails" type="button"><i data-lucide="arrow-right"></i> العودة</button>
+            </div>
+          </div>
+
+          <section class="panel form-panel">
+            <div class="details-grid">
+              <div><span class="field-label">رقم التذكرة</span><div class="detail-box flex items-center justify-between"><span class="ticket-number">${ticket.id}</span><button id="copyDetailTicket" type="button" class="icon-button" aria-label="نسخ رقم التذكرة"><i data-lucide="copy"></i></button></div></div>
+              <div><span class="field-label">الحالة</span><div class="detail-box flex items-center justify-between gap-2"><span class="badge ${statusClass(ticket.status)}">${statusLabel(ticket.status)}</span>${ticket.status !== "Closed" ? `<select id="statusChange" class="field !w-auto !py-1"><option value="">تغيير الحالة</option>${options.map(status=>`<option value="${status}">${statusLabel(status)}</option>`).join("")}</select>` : ""}</div></div>
+              <div><span class="field-label">رقم العميل</span><div class="detail-box" dir="ltr">${esc(ticket.customerId)}</div></div>
+              <div><span class="field-label">اسم العميل</span><div class="detail-box">${esc(ticket.customer)}</div></div>
+              <div><span class="field-label">الحساب</span><div class="detail-box" dir="ltr">${esc(ticket.account)}</div></div>
+              <div><span class="field-label">مصدر التذكرة</span><div class="detail-box">${esc(ticket.source)}</div></div>
+              <div><span class="field-label">الموظف المسؤول</span><div class="detail-box">${esc(ticket.assignee)}</div></div>
+              <div><span class="field-label">الأولوية</span><div class="detail-box">${({Low:"منخفضة",Medium:"متوسطة",High:"عالية",Urgent:"عاجلة"})[ticket.priority] || esc(ticket.priority)}</div></div>
+              <div class="full-field"><span class="field-label">الوصف التفصيلي</span><div class="detail-box whitespace-pre-wrap min-h-32">${esc(ticket.description || "لم يتم إدخال وصف تفصيلي حتى الآن.")}</div></div>
+            </div>
+
+            <section class="mt-6 border-t border-emerald-100 pt-5">
+              <h2 class="section-heading">مرفقات التذكرة</h2>
+              <p class="page-subtitle">افتح أو نزّل الملفات المرتبطة بهذه التذكرة (مخزّنة في Supabase Storage).</p>
+              <div class="settings-list">${ticket.attachments.length ? ticket.attachments.map(item => attachmentMarkup(item)).join("") : `<p class="page-subtitle">لا توجد مرفقات لهذه التذكرة.</p>`}</div>
+            </section>
+
+            <section class="mt-6 border-t border-emerald-100 pt-5">
+              <h2 class="section-heading">الرد النهائي للعميل</h2>
+              <p class="page-subtitle">هذا الرد مستقل تماماً عن الردود الداخلية ولا يظهر ضمن ملاحظات الفريق.</p>
+              <form id="finalReplyForm" class="mt-4">
+                <label class="field-label" for="finalReply">نص الرد المعتمد</label>
+                <textarea id="finalReply" class="field min-h-28" ${ticket.status === "Closed" ? "readonly" : ""}>${esc(ticket.finalReply)}</textarea>
+                <div class="flex items-center gap-3 mt-3 flex-wrap">
+                  ${ticket.status !== "Closed" ? `<button class="primary-button" id="saveFinalReply" type="submit"><i data-lucide="send"></i> حفظ الرد النهائي</button>` : ""}
+                  ${ticket.finalReplyUpdatedAt ? `<span class="text-xs text-slate-500">آخر حفظ: ${dateText(ticket.finalReplyUpdatedAt)}</span>` : ""}
+                </div>
+              </form>
+            </section>
+
+            <section class="mt-6 border-t border-emerald-100 pt-5">
+              <div class="flex items-center justify-between gap-3 flex-wrap"><div><h2 class="section-heading">سجل الردود الداخلية</h2><p class="page-subtitle">تبادل التحديثات بين الإدارة والموظف المسؤول عن التذكرة.</p></div><button class="soft-button" id="openConversation" type="button"><i data-lucide="messages-square"></i> فتح المحادثة${ticket.unreadReplies ? ` (${ticket.unreadReplies} غير مقروء)` : ""}</button></div>
+              ${ticket.status !== "Closed" ? `
+                <form id="noteForm" class="mt-4">
+                  <label class="field-label" for="noteAuthor">المرسل</label>
+                  <select id="noteAuthor" class="field"><option value="الإدارة">الإدارة</option>${staff.map(s=>`<option value="${esc(s.name)}">${esc(s.name)}</option>`).join("")}</select>
+                  <label class="field-label mt-3" for="internalNote">الرد أو التحديث الداخلي</label>
+                  <textarea id="internalNote" class="field min-h-24" placeholder="اكتب رداً أو تحديثاً للفريق"></textarea>
+                  <label class="field-label mt-3" for="noteFiles">مرفقات الرد الداخلي</label>
+                  <input id="noteFiles" class="field" type="file" multiple>
+                  <div id="notePendingFiles" class="settings-list"></div>
+                  <button class="primary-button mt-3" id="sendInternalReply" type="submit"><i data-lucide="message-square-plus"></i> إرسال الرد</button>
+                </form>` : `<div class="notice">التذكرة مغلقة، ولا يمكن إضافة ردود أو تعديل الرد النهائي.</div>`}
+              <div class="settings-list mt-5" id="notesList"></div>
+            </section>
+
+          </section>`;
+
+        function drawNotes() {
+          const host = document.getElementById("notesList");
+          host.innerHTML = ticket.messages.length ? ticket.messages.map(message => `
+            <article class="note-bubble ${authorClass(message.author)} rounded-lg p-3">
+              <div class="flex items-center justify-between gap-3"><strong class="text-sm">${esc(message.author)}</strong><span class="text-[11px] text-slate-500">${dateText(message.at)}</span></div>
+              <p class="m-0 mt-1 text-sm leading-6 text-slate-600 whitespace-pre-wrap">${esc(message.text)}</p>
+              ${message.attachments?.length ? `<div class="settings-list mt-3">${message.attachments.map(item => attachmentMarkup(item)).join("")}</div>` : ""}
+            </article>`).join("") : `<p class="page-subtitle">لا توجد ردود داخلية لهذه التذكرة حتى الآن.</p>`;
+          refreshIcons();
+        }
+
+        document.getElementById("backFromDetails").addEventListener("click", () => navigate(ticket.status === "Closed" ? "archive" : "tickets"));
+        document.getElementById("copyDetailTicket").addEventListener("click", () => copyTicketNumber(ticket.id));
+        document.getElementById("openConversation").addEventListener("click", () => openConversation(ticket));
+        if (ticket.status !== "Closed") {
+          document.getElementById("editTicket").addEventListener("click", () => renderTicketForm(ticket));
+          document.getElementById("statusChange").addEventListener("change", async event => {
+            const next = event.target.value;
+            if (!next) return;
+            const previous = ticket.status;
+            event.target.disabled = true;
+            try {
+              const { error } = await supabaseClient.from("tickets").update({ status: next }).eq("id", ticket.id);
+              if (error) throw error;
+              await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author:"الإدارة", change:"تم تغيير الحالة", from_value: statusLabel(previous), to_value: statusLabel(next) });
+              showToast(`تم تغيير حالة التذكرة إلى ${statusLabel(next)}.`);
+              await loadTickets();
+              renderDetails();
+            } catch { showToast("تعذر تغيير حالة التذكرة.", "error"); event.target.disabled = false; }
+          });
+
+          document.getElementById("finalReplyForm").addEventListener("submit", async event => {
+            event.preventDefault();
+            const reply = document.getElementById("finalReply").value.trim();
+            const oldReply = ticket.finalReply;
+            try {
+              const { error } = await supabaseClient.from("tickets").update({ final_reply: reply, final_reply_updated_at: now() }).eq("id", ticket.id);
+              if (error) throw error;
+              await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author:"الإدارة", change:"تم تحديث الرد النهائي للعميل", from_value: oldReply ? "رد سابق" : "—", to_value: reply ? "تم حفظ الرد" : "تم مسح الرد" });
+              showToast("تم حفظ الرد النهائي للعميل.");
+              await loadTickets();
+              renderDetails();
+            } catch { showToast("تعذر حفظ الرد النهائي.", "error"); }
+          });
+
+          let notePendingFiles = [];
+          const drawNotePending = () => {
+            const host = document.getElementById("notePendingFiles");
+            host.innerHTML = notePendingFiles.map((file,index) => attachmentMarkup(file,true,index)).join("");
+            host.querySelectorAll(".remove-pending-file").forEach(button => button.addEventListener("click", () => {
+              const removed = notePendingFiles.splice(Number(button.dataset.index),1)[0];
+              if (removed?.url) URL.revokeObjectURL(removed.url);
+              drawNotePending();
+            }));
+            refreshIcons();
+          };
+
+          document.getElementById("noteFiles").addEventListener("change", event => {
+            notePendingFiles.push(...[...event.target.files].map(file => ({name:file.name,size:file.size,type:file.type,url:URL.createObjectURL(file),file})));
+            event.target.value = "";
+            drawNotePending();
+          });
+
+          document.getElementById("noteForm").addEventListener("submit", async event => {
+            event.preventDefault();
+            const text = document.getElementById("internalNote").value.trim();
+            if (!text && !notePendingFiles.length) {
+              showToast("اكتب رداً داخلياً أو أضف مرفقاً قبل الإرسال.", "warning");
+              return;
+            }
+            const author = document.getElementById("noteAuthor").value;
+            const sendButton = document.getElementById("sendInternalReply");
+            sendButton.disabled = true;
+            try {
+              const { data: inserted, error } = await supabaseClient.from("ticket_messages").insert({ ticket_id: ticket.id, author, text_content: text }).select().single();
+              if (error) throw error;
+              if (notePendingFiles.length) {
+                for (const pf of notePendingFiles) {
+                  const uploaded = await uploadPendingFile(pf, ticket.id);
+                  await supabaseClient.from("ticket_attachments").insert({ ticket_id: ticket.id, message_id: inserted.id, name: uploaded.name, size: uploaded.size, type: uploaded.type, storage_path: uploaded.storagePath });
+                }
+              }
+              await supabaseClient.from("tickets").update({ unread_replies: (ticket.unreadReplies || 0) + 1 }).eq("id", ticket.id);
+              await supabaseClient.from("ticket_audit").insert({ ticket_id: ticket.id, author, change:"إضافة رد داخلي", from_value:"—", to_value: text ? "تم إرسال رد" : "تم إرسال مرفقات" });
+              notePendingFiles = [];
+              await loadTickets();
+              selectedTicketId = ticket.id;
+              renderDetails();
+              showToast("تم إرسال الرد الداخلي.");
+            } catch {
+              showToast("تعذر إرسال الرد الداخلي.", "error");
+              sendButton.disabled = false;
+            }
+          });
+        }
+
+        drawNotes();
+        refreshIcons();
+      }
+
+      function renderStaff() {
+        appMain.innerHTML = `${header("الموظفون","إدارة أعضاء فريق خدمة العملاء وحالة توفرهم.")}
+          <section class="panel form-panel"><h2 class="section-heading">إضافة موظف</h2>
+            <form id="staffForm" class="form-grid mt-4">
+              <div><label class="field-label" for="staffName">اسم الموظف</label><input id="staffName" class="field" required></div>
+              <div><label class="field-label" for="staffRole">المسمى الوظيفي</label><input id="staffRole" class="field" required></div>
+              <div><label class="field-label" for="staffStatus">حالة التوفر</label><select id="staffStatus" class="field"><option>متاح</option><option>في استراحة</option><option>غير متاح</option></select></div>
+              <div class="flex items-end"><button class="primary-button w-full" type="submit"><i data-lucide="user-plus"></i> إضافة الموظف</button></div>
+            </form>
+          </section><section class="grid md:grid-cols-2 xl:grid-cols-3 gap-4 mt-5" id="staffList"></section>`;
+
+        function draw() {
+          const list = document.getElementById("staffList");
+          list.innerHTML = staff.map((member,index) => `<article class="panel staff-card"><div class="flex items-start justify-between gap-3"><div class="flex items-center gap-3"><div class="staff-avatar">${esc(member.name.charAt(0))}</div><div><h2 class="m-0 text-sm font-extrabold">${esc(member.name)}</h2><p class="page-subtitle mt-1">${esc(member.role)}</p></div></div><button class="icon-button remove-staff" data-index="${index}" aria-label="إزالة الموظف" type="button"><i data-lucide="trash-2"></i></button></div><span class="badge status-resolved mt-4">${esc(member.status)}</span></article>`).join("");
+          list.querySelectorAll(".remove-staff").forEach(button => button.addEventListener("click", async () => {
+            const member = staff[Number(button.dataset.index)];
+            button.disabled = true;
+            try {
+              const { error } = await supabaseClient.from("staff").delete().eq("id", member.id);
+              if (error) throw error;
+              await loadStaff();
+              draw();
+              showToast("تمت إزالة الموظف.");
+            } catch { showToast("تعذر إزالة الموظف.", "error"); button.disabled = false; }
+          }));
+          refreshIcons();
+        }
+
+        document.getElementById("staffForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          const submitButton = event.target.querySelector("button[type=submit]");
+          submitButton.disabled = true;
+          try {
+            const { error } = await supabaseClient.from("staff").insert({ name: staffName.value.trim(), role: staffRole.value.trim(), status: staffStatus.value });
+            if (error) throw error;
+            event.target.reset();
+            await loadStaff();
+            draw();
+            showToast("تمت إضافة الموظف.");
+          } catch { showToast("تعذر إضافة الموظف.", "error"); }
+          submitButton.disabled = false;
+        });
+        draw();
+      }
+
+      function renderArchive() {
+        const archived = tickets.filter(t => t.status === "Closed");
+        appMain.innerHTML = `${header("أرشيف التذاكر","التذاكر المغلقة محفوظة هنا ويمكن استعادتها إلى قائمة التذاكر.")}
+          <div class="flex justify-end mt-5"><button class="primary-button" id="exportArchiveButton" type="button"><i data-lucide="file-spreadsheet"></i> تصدير Excel</button></div>
+          ${ticketTable(archived,true)}`;
+        document.getElementById("exportArchiveButton").addEventListener("click", () => exportArchiveExcel(archived));
+        bindTableActions(appMain);
+        refreshIcons();
+      }
+
+      function renderReports() {
+        const active = tickets.filter(t => t.status !== "Closed");
+        const max = Math.max(active.length,1);
+        const statuses = ["New","Open","In Progress","Pending Customer","Resolved"];
+        appMain.innerHTML = `${header("التقارير","ملخص حي لحالة العمل وتوزيع التذاكر بين أعضاء الفريق.")}
+          <section class="metrics"><article class="panel metric"><div class="metric-label">إجمالي التذاكر</div><div class="metric-value">${tickets.length}</div></article><article class="panel metric gold"><div class="metric-label">التذاكر النشطة</div><div class="metric-value">${active.length}</div></article><article class="panel metric green"><div class="metric-label">الموظفون</div><div class="metric-value">${staff.length}</div></article><article class="panel metric"><div class="metric-label">تذاكر الأرشيف</div><div class="metric-value">${tickets.filter(t=>t.status==="Closed").length}</div></article></section>
+          <section class="grid lg:grid-cols-2 gap-5 mt-5"><article class="panel p-5"><h2 class="section-heading">التذاكر حسب الحالة</h2><div class="grid gap-4 mt-5">${statuses.map(s=>{const count=active.filter(t=>t.status===s).length;return `<div><div class="flex justify-between text-sm mb-2"><span>${statusLabel(s)}</span><strong>${count}</strong></div><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%"></div></div></div>`}).join("")}</div></article>
+          <article class="panel p-5"><h2 class="section-heading">توزيع التذاكر على الموظفين</h2><div class="grid gap-4 mt-5">${staff.map(m=>{const count=active.filter(t=>t.assignee===m.name).length;return `<div><div class="flex justify-between text-sm mb-2"><span>${esc(m.name)}</span><strong>${count}</strong></div><div class="bar-track"><div class="bar-fill" style="width:${count/max*100}%"></div></div></div>`}).join("")}</div></article></section>`;
+      }
+
+      function renderGuide() {
+        appMain.innerHTML = `${header("دليل استخدام اللوحة","إرشادات سريعة لموظفي الدعم لإدارة التذاكر بشكل متسق.")}
+          <section class="grid lg:grid-cols-2 gap-5 mt-5">
+            <article class="panel p-5"><h2 class="section-heading">دورة حالة التذكرة</h2><div class="settings-list"><div class="list-row"><strong>جديدة</strong><span class="text-sm text-slate-500">افتح التذكرة لبدء العمل عليها.</span></div><div class="list-row"><strong>مفتوحة</strong><span class="text-sm text-slate-500">ابدأ المعالجة أو اطلب معلومات من العميل.</span></div><div class="list-row"><strong>قيد المعالجة</strong><span class="text-sm text-slate-500">تجري مراجعة المشكلة من الفريق.</span></div><div class="list-row"><strong>بانتظار العميل</strong><span class="text-sm text-slate-500">ينتظر الفريق رداً أو مستنداً من العميل.</span></div><div class="list-row"><strong>محلولة</strong><span class="text-sm text-slate-500">تمت المعالجة ويمكن إرسال الرد النهائي.</span></div><div class="list-row"><strong>مغلقة</strong><span class="text-sm text-slate-500">تنتقل إلى الأرشيف ولا يمكن تعديلها.</span></div></div></article>
+            <article class="panel p-5"><h2 class="section-heading">المرفقات والردود</h2><div class="settings-list"><div class="list-row"><span>أضف مرفقات من نموذج إنشاء التذكرة قبل الحفظ، وتُرفع مباشرة إلى Supabase Storage.</span></div><div class="list-row"><span>استخدم الردود الداخلية للتواصل بين أعضاء فريق الدعم فقط.</span></div><div class="list-row"><span>احفظ النص المعتمد داخل مربع الرد النهائي للعميل بشكل منفصل.</span></div><div class="list-row"><span>انسخ رقم التذكرة من الجدول أو من صفحة التفاصيل عند مشاركة المرجع مع الفريق.</span></div><div class="list-row"><span>راجع سجل التعديلات قبل إغلاق أي تذكرة.</span></div></div></article>
+          </section>`;
+      }
+
+      function renderSettings() {
+        appMain.innerHTML = `${header("الإعدادات","أضف مصادر التذاكر وملخصات المشاكل السريعة التي تظهر عند إنشاء أو تعديل التذاكر.")}
+          <section class="panel form-panel"><h2 class="section-heading">مصادر التذاكر</h2><p class="page-subtitle">تظهر هذه الخيارات في حقل مصدر التذكرة.</p><form id="sourceForm" class="mt-4 flex gap-2 flex-wrap"><label class="sr-only" for="newSource">مصدر تذكرة جديد</label><input id="newSource" class="field flex-1 min-w-[220px]" placeholder="مثال: إنستغرام أو متجر إلكتروني" required><button class="primary-button" type="submit"><i data-lucide="plus"></i> إضافة مصدر</button></form><div id="sourcesList" class="settings-list"></div></section>
+          <section class="panel form-panel"><h2 class="section-heading">ملخصات المشاكل السريعة</h2><p class="page-subtitle">هذه خيارات مختصرة للعرض في جدول التذاكر.</p><form id="shortcutForm" class="mt-4 flex gap-2 flex-wrap"><label class="sr-only" for="newShortcut">ملخص مشكلة جديد</label><input id="newShortcut" class="field flex-1 min-w-[220px]" placeholder="مثال: لم تصل رسالة التحقق" required><button class="primary-button" type="submit"><i data-lucide="plus"></i> إضافة ملخص</button></form><div id="shortcutsList" class="settings-list"></div></section>`;
+
+        let sourceRows = [];
+        let shortcutRows = [];
+
+        async function loadRows() {
+          const [{ data: sourceData }, { data: shortcutData }] = await Promise.all([
+            supabaseClient.from("settings_sources").select("*").order("id"),
+            supabaseClient.from("settings_shortcuts").select("*").order("id")
+          ]);
+          sourceRows = sourceData || [];
+          shortcutRows = shortcutData || [];
+          drawList("sourcesList", sourceRows, "source");
+          drawList("shortcutsList", shortcutRows, "shortcut");
+        }
+
+        function drawList(id, rows, type) {
+          const host = document.getElementById(id);
+          host.innerHTML = rows.map(row => `<div class="list-row"><span>${esc(row.value)}</span><button class="soft-button delete-setting" data-type="${type}" data-id="${row.id}" type="button"><i data-lucide="trash-2"></i> حذف</button></div>`).join("");
+          host.querySelectorAll(".delete-setting").forEach(button => button.addEventListener("click", async () => {
+            const table = button.dataset.type === "source" ? "settings_sources" : "settings_shortcuts";
+            button.disabled = true;
+            try {
+              const { error } = await supabaseClient.from(table).delete().eq("id", button.dataset.id);
+              if (error) throw error;
+              await Promise.all([loadSources(), loadShortcuts()]);
+              await loadRows();
+              showToast("تم حذف الخيار من الإعدادات.");
+            } catch { showToast("تعذر حذف الخيار.", "error"); button.disabled = false; }
+          }));
+          refreshIcons();
+        }
+
+        document.getElementById("sourceForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          const value = document.getElementById("newSource").value.trim();
+          if (!value) return;
+          try {
+            const { error } = await supabaseClient.from("settings_sources").insert({ value });
+            if (error) throw error;
+            document.getElementById("newSource").value = "";
+            await loadSources();
+            await loadRows();
+            showToast("تمت إضافة مصدر التذكرة.");
+          } catch { showToast("تعذر إضافة المصدر (قد يكون مضافاً مسبقاً).", "error"); }
+        });
+        document.getElementById("shortcutForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          const value = document.getElementById("newShortcut").value.trim();
+          if (!value) return;
+          try {
+            const { error } = await supabaseClient.from("settings_shortcuts").insert({ value });
+            if (error) throw error;
+            document.getElementById("newShortcut").value = "";
+            await loadShortcuts();
+            await loadRows();
+            showToast("تمت إضافة ملخص المشكلة.");
+          } catch { showToast("تعذر إضافة الملخص (قد يكون مضافاً مسبقاً).", "error"); }
+        });
+
+        loadRows();
+      }
+
+      function exportTicketsExcel(items) {
+        if (!window.XLSX) { showToast("تعذر تحميل أداة تصدير Excel. يرجى المحاولة مرة أخرى.", "error"); return; }
+        const rows = items.map(t => ({
+          "رقم التذكرة": t.id, "رقم العميل": t.customerId, "اسم العميل": t.customer, "حساب العميل": t.account,
+          "مصدر التذكرة": t.source, "الوصف المختصر": t.summary || t.description || "", "الموظف": t.assignee, "الحالة": statusLabel(t.status)
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        worksheet["!cols"] = Object.keys(rows[0] || {}).map(() => ({ wch: 24 }));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "التذاكر");
+        XLSX.writeFile(workbook, "customer-service-tickets.xlsx");
+        showToast("تم تصدير التذاكر بصيغة Excel.");
+      }
+
+      function exportArchiveExcel(items) {
+        if (!window.XLSX) { showToast("تعذر تحميل أداة تصدير Excel. يرجى المحاولة مرة أخرى.", "error"); return; }
+        const rows = items.map(t => ({
+          "رقم التذكرة": t.id, "رقم العميل": t.customerId, "اسم العميل": t.customer, "رقم الجوال": t.phone || "",
+          "حساب العميل": t.account, "الحالة": statusLabel(t.status), "الموظف المسؤول": t.assignee, "مصدر المشكلة": t.source,
+          "الوصف المختصر": t.summary || "", "الوصف التفصيلي": t.description || "",
+          "الأولوية": ({Low:"منخفضة",Medium:"متوسطة",High:"عالية",Urgent:"عاجلة"})[t.priority] || t.priority || "",
+          "تاريخ الإنشاء": t.createdAt || "", "آخر تحديث للرد النهائي": t.finalReplyUpdatedAt || "", "الرد النهائي": t.finalReply || "",
+          "عدد الردود الداخلية": (t.messages || []).length, "عدد المرفقات": (t.attachments || []).length
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(rows);
+        worksheet["!cols"] = Object.keys(rows[0] || {}).map(() => ({ wch: 24 }));
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "أرشيف التذاكر");
+        XLSX.writeFile(workbook, "customer-service-tickets-archive.xlsx");
+        showToast("تم تصدير أرشيف التذاكر بصيغة Excel.");
+      }
+
+      async function copyTicketNumber(id) {
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(id);
+          } else {
+            const helper = document.createElement("textarea");
+            helper.value = id; helper.style.position = "fixed"; helper.style.opacity = "0";
+            document.body.appendChild(helper); helper.select(); document.execCommand("copy"); helper.remove();
+          }
+          showToast(`تم نسخ رقم التذكرة ${id}.`);
+        } catch { showToast("تعذر نسخ رقم التذكرة. يرجى نسخه يدوياً.", "error"); }
+      }
+
+      function openConversation(ticket) {
+        const modal = document.getElementById("conversationModal");
+        const content = document.getElementById("conversationContent");
+        if (ticket.unreadReplies) {
+          supabaseClient.from("tickets").update({ unread_replies: 0 }).eq("id", ticket.id).then(() => { ticket.unreadReplies = 0; updateUnreadIndicator(); });
+        }
+        content.innerHTML = ticket.messages.length ? ticket.messages.map(message => `<article class="note-bubble ${authorClass(message.author)} rounded-lg p-3 mb-3"><div class="flex items-center justify-between gap-3"><strong class="text-sm">${esc(message.author)}</strong><span class="text-[11px] text-slate-500">${dateText(message.at)}</span></div><p class="m-0 mt-1 text-sm leading-6 text-slate-600 whitespace-pre-wrap">${esc(message.text || "مرفق بدون نص")}</p>${message.attachments?.length ? `<div class="settings-list mt-3">${message.attachments.map(item => attachmentMarkup(item)).join("")}</div>` : ""}</article>`).join("") : `<p class="page-subtitle">لا توجد ردود داخلية لهذه التذكرة حتى الآن.</p>`;
+        modal.hidden = false;
+        document.getElementById("closeConversation").onclick = () => { modal.hidden = true; renderDetails(); };
+        refreshIcons();
+      }
+
+      function openTicket(id) { selectedTicketId = id; navigate("details"); }
+
+      function navigate(view) {
+        document.querySelectorAll(".nav-button").forEach(button => button.classList.toggle("active",button.dataset.view === view));
+        document.getElementById("sidebar").classList.remove("open");
+        ({
+          dashboard:renderDashboard, tickets:renderTickets, staff:renderStaff, archive:renderArchive,
+          reports:renderReports, guide:renderGuide, settings:renderSettings, create:() => renderTicketForm(), details:renderDetails
+        }[view] || renderDashboard)();
+      }
+
+      document.querySelectorAll(".nav-button").forEach(button => button.addEventListener("click", () => navigate(button.dataset.view)));
+      document.getElementById("menuButton").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
+      document.getElementById("createTicketButton").addEventListener("click", () => navigate("create"));
+      document.getElementById("unreadNotifications").addEventListener("click", () => {
+        const latest = tickets.find(ticket => Number(ticket.unreadReplies || 0) > 0);
+        if (latest) openConversation(latest);
+        else showToast("لا توجد رسائل غير مقروءة حالياً.", "warning");
+      });
+
+      (async () => {
+        await loadAll();
+        updateUnreadIndicator();
+        navigate("dashboard");
+      })();
+    })();
+  </script>
+ </body></html>
