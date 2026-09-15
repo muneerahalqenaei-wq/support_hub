@@ -1,6 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><script>window["__codeletBootstrap__"]=JSON.parse('{"A":"A","B":"20260908-05-b9d8a99","C":{"Abril Fatface":"YACgEZbkUVE,0","Alfa Slab One":"YACgEYS9sJU,0","Anton":"YACgEcYqQ-A,0","Archivo":"YAHO2-t-jNE,0","Arial":"YAGyDvJ_4Ts,0","Bebas Neue":"YACgESME5ew,0","Bricolage Grotesque":"YAFyMcdwzpc,0","Canva Sans":"YAFLd8sKbwc,2","Caveat":"YALBs2ploWQ,0","Comic Sans MS":"YAHO2VMiyZo,0","Cormorant Garamond":"YAFdJhX-538,0","Courier New":"YAGzXiGs0_8,0","DM Sans":"YAD1aU3sLnI,0","DM Serif Display":"YAD1aYG82rc,0","Forum":"YACgEcnnqB4,0","Fraunces":"YAEul-FRQw4,0","Georgia":"YAGzXkO0pEM,0","Helvetica Neue":"YAFcf6CtJfI,0","Impact":"YAFcfnjI7Vk,0","Inter":"YAFdJvSyp_k,3","Iowan Old Style":"YAGNIFa8j9o,0","Jacques Francois":"YAHO2a5g66Q,0","JetBrains Mono":"YAFdJksXcAk,0","Libre Baskerville":"YACgEUFdPdA,0","Manrope":"YAHO2b2feC4,0","Merriweather":"YACgEXvHxxs,0","Montserrat":"YADLjI9qxTA,0","Nunito":"YACgEX8C5Gg,0","Oleo Script":"YACgEQQ14jI,0","Phantom Sans":"YAHO2E8Pb88,0","Playfair Display":"YACgEYmuCJE,0","Poppins":"YAFdJjbTu24,1","Press Start 2P":"YAFyGr-8pmQ,0","Quicksand":"YADWjpfPmdk,0","Raleway":"YACgEVg3xZg,0","Segoe UI":"YAHNdRD1Klw,0","Source Sans 3":"YAG4lO1Mj10,0","Spectral":"YAHO2rVUHIM,0","Times New Roman":"YAGzXW3gftg,0","Times":"YAGzXW3gftg,0","Ubuntu":"YACgERDU--Q,0","Work Sans":"YAGXhLOKv44,0","Yellowtail":"YACgEYG4kG4,0","ui-monospace":"YADlN8CFZ8Q,0","ui-sans-serif":"YACkoN-xg4g,0"}}');</script><script src="/_sdk/9e99ecf74af2a081.telemetry_sdk.js" integrity="sha512-tZ7fmfTx2KpCLjXQnEuL9azQ4A5+7+xumsx6r/WYVD0zCP/8LP8hDeCypMQesmP+WyAew4g7l5Ah23Bjd6yoVg=="></script>
-  <meta charset="UTF-8">
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Customer Service Ticketing Dashboard</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
@@ -86,7 +85,7 @@
     .field:focus, .select-field:focus { border-color: var(--brand-teal); box-shadow: 0 0 0 3px #268F8520; outline: none; }
     .filter-grid { display: grid; grid-template-columns: 2fr repeat(2, 1fr); gap: 10px; }
     .table-wrap { overflow: auto; }
-    .data-table { width: 100%; min-width: 780px; border-collapse: collapse; }
+    .data-table { width: 100%; min-width: 850px; border-collapse: collapse; }
     .data-table th { background: #f7faf8; border-bottom: 1px solid var(--line); color: #607067; font-size: 11px; padding: 13px 12px; text-align: right; white-space: nowrap; }
     .data-table td { border-bottom: 1px solid #edf3ef; font-size: 12px; padding: 14px 12px; vertical-align: middle; }
     .data-table tr:hover td { background: #fbfdfb; }
@@ -94,7 +93,6 @@
     .mono { font-family: Tahoma, sans-serif; direction: ltr; display: inline-block; }
     .badge { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; white-space: nowrap; }
 
-    /* Status and priority colours intentionally remain unchanged. */
     .status-new { background: #e5efff; color: #195bad; }
     .status-open { background: #ecf2f8; color: #42617d; }
     .status-progress { background: #fff5d9; color: #966600; }
@@ -163,13 +161,14 @@
       .summary-grid { grid-template-columns: repeat(3, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
     }
-    /* CREATE TICKET: true full-screen page, never a modal */
-    body.create-ticket-mode { overflow: hidden !important; }
+    body.create-ticket-mode, body.edit-ticket-mode { overflow: hidden !important; }
     body.create-ticket-mode .side-nav,
-    body.create-ticket-mode .topbar { display: none !important; }
-    body.create-ticket-mode .main-area { width: 100% !important; margin: 0 !important; min-height: 100dvh !important; }
-    body.create-ticket-mode .page-body { padding: 0 !important; width: 100% !important; min-height: 100dvh !important; }
-    body.create-ticket-mode #appMain { width: 100%; min-height: 100dvh; }
+    body.create-ticket-mode .topbar,
+    body.edit-ticket-mode .side-nav,
+    body.edit-ticket-mode .topbar { display: none !important; }
+    body.create-ticket-mode .main-area, body.edit-ticket-mode .main-area { width: 100% !important; margin: 0 !important; min-height: 100dvh !important; }
+    body.create-ticket-mode .page-body, body.edit-ticket-mode .page-body { padding: 0 !important; width: 100% !important; min-height: 100dvh !important; }
+    body.create-ticket-mode #appMain, body.edit-ticket-mode #appMain { width: 100%; min-height: 100dvh; }
     .create-ticket-screen {
       width: 100%; min-height: 100dvh; background: #f4f8f5;
       overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
@@ -184,7 +183,6 @@
     }
 
     @media (max-width: 760px) {
-      /* Mobile: allow the whole page/modal to scroll naturally */
       html, body {
         min-height: 100%;
         height: auto;
@@ -192,11 +190,7 @@
         overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
       }
-
-      #modalRoot {
-        position: relative;
-      }
-
+      #modalRoot { position: relative; }
       .side-nav { transform: translateX(100%); transition: .2s ease; }
       body[dir="ltr"] .side-nav { transform: translateX(-100%); }
       .side-nav.open { transform: translateX(0); }
@@ -208,56 +202,24 @@
       .form-full { grid-column: auto; }
       .mobile-menu { display: inline-flex; }
       .view-title { font-size: 20px; }
-
-      /* Mobile modal: use the page's natural scroll instead of trapping content inside the modal. */
       .modal-backdrop {
-        position: absolute;
-        inset: 0 auto auto 0;
-        width: 100%;
-        min-height: 100vh;
-        min-height: 100dvh;
-        height: auto;
-        align-items: flex-start;
-        padding: 12px;
-        overflow: visible;
+        position: absolute; inset: 0 auto auto 0; width: 100%;
+        min-height: 100vh; min-height: 100dvh; height: auto;
+        align-items: flex-start; padding: 12px; overflow: visible;
       }
-
-      .modal {
-        width: 100%;
-        max-height: none;
-        height: auto;
-        margin: 0 auto;
-        border-radius: 14px;
-        overflow: visible;
-      }
-      .modal-head,
-      .modal-foot {
-        padding: 14px 16px;
-      }
-      .modal-foot {
-        position: static;
-        flex-wrap: wrap;
-        background: #FFFFFF;
-      }
-      .modal-foot .primary-btn,
-      .modal-foot .soft-btn {
-        min-height: 44px;
-        flex: 1 1 140px;
-      }
-      .modal-body {
-        padding: 16px;
-        overflow: visible;
-      }
+      .modal { width: 100%; max-height: none; height: auto; margin: 0 auto; border-radius: 14px; overflow: visible; }
+      .modal-head, .modal-foot { padding: 14px 16px; }
+      .modal-foot { position: static; flex-wrap: wrap; background: #FFFFFF; }
+      .modal-foot .primary-btn, .modal-foot .soft-btn { min-height: 44px; flex: 1 1 140px; }
+      .modal-body { padding: 16px; overflow: visible; }
     }
   
-      @media (max-width: 760px) {
-        .page-body { overflow: visible !important; height: auto !important; min-height: calc(100dvh - 70px); padding-bottom: 32px; }
-        #appMain { overflow: visible !important; height: auto !important; }
-        #ticketForm { width: 100%; }
-      }
+    @media (max-width: 760px) {
+      .page-body { overflow: visible !important; height: auto !important; min-height: calc(100dvh - 70px); padding-bottom: 32px; }
+      #appMain { overflow: visible !important; height: auto !important; }
+      #ticketForm { width: 100%; }
+    }
 </style>
-  <script src="/_sdk/fbe2ebfd64647c54.data_sdk.js" type="text/javascript" integrity="sha512-vkTX6CfvpHc3WbjK+tFJCaDuw4ERA4aEV/e5/7+MMJPMTF4RJYCI6CAwJBT/gtDW+dba4uLSsPUgDjVDHWtgUQ=="></script>
-  <script src="/_sdk/fcb6dc01f91829ac.resizing_sdk.js" type="text/javascript" integrity="sha512-YK8JfnN705qaEaVhiL7pcVB2Rs/BbdX5yxV55Az8zT/1JanyEWTw9HqCF915m9iV1YEaoil8qsjJz03l1Kb0Ug=="></script>
  </head>
  <body data-template-id="__page-root" style="background: rgb(244, 248, 245);">
   <div class="app-shell">
@@ -271,7 +233,10 @@
      </div>
     </header>
     <nav aria-label="التنقل الرئيسي">
-     <button class="nav-link active" type="button" data-view="dashboard"> <i data-lucide="layout-dashboard"></i> <span class="canva-text" data-template-id="nav-dashboard" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">لوحة التحكم</span> </button> <button class="nav-link" type="button" data-view="tickets"> <i data-lucide="ticket"></i> <span class="canva-text" data-template-id="nav-tickets" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التذاكر</span> </button> <button class="nav-link" type="button" data-view="employees"> <i data-lucide="users"></i> <span class="canva-text" data-template-id="nav-employees" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الموظفون</span> </button> <button class="nav-link" type="button" data-view="reports"> <i data-lucide="chart-no-axes-combined"></i> <span class="canva-text" data-template-id="nav-reports" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التقارير</span> </button> <button class="nav-link" type="button" data-view="settings"> <i data-lucide="settings"></i> <span class="canva-text" data-template-id="nav-settings" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الإعدادات</span> </button> <button class="nav-link" type="button" data-view="guide"> <i data-lucide="book-open"></i> <span class="canva-text" data-template-id="nav-guide" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">دليل الاستخدام</span> </button>
+     <button class="nav-link active" type="button" data-view="dashboard"> <i data-lucide="layout-dashboard"></i> <span class="canva-text" data-template-id="nav-dashboard" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">لوحة التحكم</span> </button> <button class="nav-link" type="button" data-view="tickets"> <i data-lucide="ticket"></i> <span class="canva-text" data-template-id="nav-tickets" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التذاكر</span> </button> 
+     <!-- زر الأرشيف المضاف حديثاً -->
+     <button class="nav-link" type="button" data-view="archive"> <i data-lucide="archive"></i> <span class="canva-text" data-template-id="nav-archive" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الأرشيف</span> </button>
+     <button class="nav-link" type="button" data-view="employees"> <i data-lucide="users"></i> <span class="canva-text" data-template-id="nav-employees" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الموظفون</span> </button> <button class="nav-link" type="button" data-view="reports"> <i data-lucide="chart-no-axes-combined"></i> <span class="canva-text" data-template-id="nav-reports" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">التقارير</span> </button> <button class="nav-link" type="button" data-view="settings"> <i data-lucide="settings"></i> <span class="canva-text" data-template-id="nav-settings" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">الإعدادات</span> </button> <button class="nav-link" type="button" data-view="guide"> <i data-lucide="book-open"></i> <span class="canva-text" data-template-id="nav-guide" style="color: rgb(229, 244, 240); font-weight: 600; font-style: normal; font-size: 16px;">دليل الاستخدام</span> </button>
     </nav>
    </aside>
    <div class="main-area">
@@ -286,154 +251,13 @@
   </div>
   <div id="modalRoot"></div>
   <div id="toast" class="toast" role="status"></div>
-  <script src="/_sdk/20ec72cea0cb85e1.editing_sdk.js" integrity="sha512-y1Lf0yXrnk1vqzLs9a/3x3pp+jSvei2Pbl+x/omYgN5b7HqLzMgs5Vx9HdgcQfw7jcDinPHCzHGQ6BsPf/68zQ=="></script>
   <script>
     (() => {
       let tickets = [];
-      /*
-        {
-          id: "TKT-2026-000001",
-          customer: "شركة المدار للتجارة",
-          issue: "تعذر إتمام عملية الدفع",
-          category: "Payment",
-          priority: "Urgent",
-          assignee: "سارة أحمد",
-          status: "In Progress",
-          createdAt: "2026-09-07",
-          closedAt: "",
-          updated: "2026-09-08",
-          attachments: [],
-          messages: [
-            { author: "سارة أحمد", role: "support", text: "تم تصعيد المشكلة إلى فريق المدفوعات وجارٍ التحقق.", at: "2026-09-07T10:30:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000002",
-          customer: "محمد العتيبي",
-          issue: "لم يصل رمز القسيمة إلى البريد",
-          category: "Coupon",
-          priority: "High",
-          assignee: "خالد حسن",
-          status: "Pending Customer",
-          createdAt: "2026-09-06",
-          closedAt: "",
-          updated: "2026-09-07",
-          attachments: [],
-          messages: [
-            { author: "Admin", role: "admin", text: "تم طلب صورة من رسالة الخطأ من العميل.", at: "2026-09-06T14:15:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000003",
-          customer: "متجر نقطة بيع",
-          issue: "طلب استرداد مبلغ مكرر",
-          category: "Refund",
-          priority: "Medium",
-          assignee: "نورة عبدالله",
-          status: "Resolved",
-          createdAt: "2026-09-04",
-          closedAt: "2026-09-05",
-          updated: "2026-09-05",
-          attachments: [],
-          messages: [
-            { author: "نورة عبدالله", role: "support", text: "تم تنفيذ الاسترداد وإبلاغ العميل بالتفاصيل.", at: "2026-09-05T09:00:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000004",
-          customer: "ليان القحطاني",
-          issue: "استفسار عن رصيد المحفظة",
-          category: "Wallet",
-          priority: "Low",
-          assignee: "خالد حسن",
-          status: "Open",
-          createdAt: "2026-09-08",
-          closedAt: "",
-          updated: "2026-09-08",
-          attachments: [],
-          messages: []
-        },
-        {
-          id: "TKT-2026-000005",
-          customer: "مؤسسة أفق الأعمال",
-          issue: "تأخر تحديث حالة الطلب",
-          category: "Other",
-          priority: "High",
-          assignee: "سارة أحمد",
-          status: "New",
-          createdAt: "2026-09-08",
-          closedAt: "",
-          updated: "2026-09-08",
-          attachments: [],
-          messages: [
-            { author: "Admin", role: "admin", text: "تم استلام الطلب وتحويله إلى فريق العمليات للمراجعة.", at: "2026-09-08T07:45:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000006",
-          customer: "عبدالله الشهري",
-          issue: "تظهر رسالة خطأ عند تسجيل الدخول",
-          category: "Other",
-          priority: "Urgent",
-          assignee: "خالد حسن",
-          status: "In Progress",
-          createdAt: "2026-09-07",
-          closedAt: "",
-          updated: "2026-09-08",
-          attachments: [],
-          messages: [
-            { author: "خالد حسن", role: "support", text: "تم طلب تسجيل شاشة للمشكلة وتجربة خطوات بديلة.", at: "2026-09-08T08:10:00Z" },
-            { author: "Admin", role: "admin", text: "يرجى متابعة الحالة قبل انتهاء وقت SLA.", at: "2026-09-08T08:25:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000007",
-          customer: "متجر الندى الإلكتروني",
-          issue: "تعديل بيانات الفاتورة الضريبية",
-          category: "Refund",
-          priority: "Medium",
-          assignee: "نورة عبدالله",
-          status: "Pending Customer",
-          createdAt: "2026-09-06",
-          closedAt: "",
-          updated: "2026-09-07",
-          attachments: [],
-          messages: [
-            { author: "نورة عبدالله", role: "support", text: "بانتظار إرسال الرقم الضريبي الصحيح من العميل.", at: "2026-09-07T12:20:00Z" }
-          ]
-        },
-        {
-          id: "TKT-2026-000008",
-          customer: "شركة روافد التقنية",
-          issue: "تم حل مشكلة ظهور الرصيد المتأخر",
-          category: "Wallet",
-          priority: "Low",
-          assignee: "مريم علي",
-          status: "Resolved",
-          createdAt: "2026-09-05",
-          closedAt: "2026-09-06",
-          updated: "2026-09-06",
-          attachments: [],
-          messages: [
-            { author: "مريم علي", role: "support", text: "تمت مزامنة الرصيد وإبلاغ العميل بإتمام الحل.", at: "2026-09-06T15:40:00Z" }
-          ]
-        }
-      ];
-
-      */
       let employees = [];
-      /*
-        { name: "سارة أحمد", email: "sara@example.com", role: "مشرفة دعم", team: "المدفوعات", status: "Active" },
-        { name: "خالد حسن", email: "khaled@example.com", role: "موظف دعم", team: "العملاء", status: "Active" },
-        { name: "نورة عبدالله", email: "noura@example.com", role: "موظفة دعم", team: "الاسترداد", status: "Active" },
-        { name: "مريم علي", email: "maryam@example.com", role: "موظفة دعم", team: "المحافظ", status: "Active" },
-        { name: "ياسر سالم", email: "yasser@example.com", role: "موظف دعم أول", team: "العمليات", status: "Active" }
-      ];
-
-      */
-      let issueShortcuts = []; /*"تعذر إتمام الدفع", "لم يصل رمز القسيمة", "طلب استرداد مبلغ", "خطأ عند تسجيل الدخول", "تعديل بيانات الفاتورة"];
-      */
+      let issueShortcuts = [];
       let ticketSources = [];
+      let slaSettings = { Urgent: 1, High: 4, Medium: 12, Low: 24 };
 
       let currentView = "dashboard";
       let selectedTicketId = "";
@@ -441,18 +265,13 @@
       let language = "ar";
       let toastTimer;
 
-      // ============================
       // Supabase configuration
-      // ============================
-      // Replace these two values with:
-      // Supabase Dashboard -> Project Settings -> API
       const SUPABASE_URL = "https://eojlplddbjodknseubva.supabase.co";
       const SUPABASE_ANON_KEY = "sb_publishable_No1R26-FkTL-YAuAykugtA_k0BxK39f";
       const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       window.supabaseClient = supabaseClient;
 
       let currentUser = null;
-      let currentEmployeeId = null;
 
       async function getSession() {
         const { data, error } = await supabaseClient.auth.getSession();
@@ -486,27 +305,33 @@
           ticketsRes,
           employeesRes,
           sourcesRes,
-          shortcutsRes
+          shortcutsRes,
+          slaRes
         ] = await Promise.all([
           supabaseClient.from("tickets").select("*").order("created_at", { ascending: false }),
           supabaseClient.from("employees").select("*").order("name"),
           supabaseClient.from("ticket_sources").select("*").eq("is_active", true).order("name"),
-          supabaseClient.from("issue_shortcuts").select("*").eq("is_active", true).order("label")
+          supabaseClient.from("issue_shortcuts").select("*").eq("is_active", true).order("label"),
+          supabaseClient.from("sla_settings").select("priority,hours")
         ]);
 
-        for (const result of [ticketsRes, employeesRes, sourcesRes, shortcutsRes]) {
+        for (const result of [ticketsRes, employeesRes, sourcesRes, shortcutsRes, slaRes]) {
           if (result.error) throw result.error;
         }
 
         employees = employeesRes.data || [];
         ticketSources = (sourcesRes.data || []).map(x => x.name);
         issueShortcuts = (shortcutsRes.data || []).map(x => x.label);
+        for (const row of (slaRes.data || [])) {
+          if (row.priority && Number.isFinite(Number(row.hours))) slaSettings[row.priority] = Number(row.hours);
+        }
 
         const rawTickets = ticketsRes.data || [];
         tickets = rawTickets.map(t => ({
           id: t.ticket_number,
           dbId: t.id,
           customer: t.customer_name,
+          phone: t.customer_phone || t.phone || "-",
           issue: t.issue_summary,
           description: t.issue_description || "",
           category: t.category,
@@ -515,6 +340,7 @@
           assignee: employees.find(e => e.id === t.assignee_id)?.name || "",
           assigneeId: t.assignee_id,
           status: t.status,
+          finalResolution: t.final_resolution || "",
           createdAt: t.created_at?.slice(0, 10) || "",
           closedAt: t.closed_at?.slice(0, 10) || "",
           updated: t.updated_at || "",
@@ -522,7 +348,6 @@
           attachments: []
         }));
 
-        // Load messages and attachments in parallel.
         await Promise.all(tickets.map(async ticket => {
           const [messagesRes, attachmentsRes] = await Promise.all([
             supabaseClient.from("ticket_messages").select("*").eq("ticket_id", ticket.dbId).order("created_at", { ascending: true }),
@@ -591,6 +416,7 @@
       }
 
       async function addMessage(ticketDbId, text, actor, attachmentFile = null) {
+        if (!text && !attachmentFile) return;
         let attachmentId = null;
         if (attachmentFile) {
           const safeName = attachmentFile.name.replace(/[^\w.\-() ]/g, "_");
@@ -625,11 +451,11 @@
       }
 
       const translations = {
-        dashboard: ["لوحة التحكم", "Dashboard"], tickets: ["التذاكر", "Tickets"], employees: ["الموظفون", "Employees"], reports: ["التقارير", "Reports"], settings: ["الإعدادات", "Settings"], guide: ["دليل الاستخدام", "User Guide"], create: ["إنشاء تذكرة", "Create Ticket"],
+        dashboard: ["لوحة التحكم", "Dashboard"], tickets: ["التذاكر", "Tickets"], archive: ["الأرشيف", "Archive"], employees: ["الموظفون", "Employees"], reports: ["التقارير", "Reports"], settings: ["الإعدادات", "Settings"], guide: ["دليل الاستخدام", "User Guide"], create: ["إنشاء تذكرة", "Create Ticket"],
         new: ["جديدة", "New"], open: ["مفتوحة", "Open"], inProgress: ["قيد المعالجة", "In Progress"], pendingCustomer: ["بانتظار العميل", "Pending Customer"], resolved: ["محلولة", "Resolved"], closed: ["مغلقة", "Closed"],
         urgent: ["عاجلة", "Urgent"], high: ["عالية", "High"], medium: ["متوسطة", "Medium"], low: ["منخفضة", "Low"],
         payment: ["الدفع", "Payment"], coupon: ["القسائم", "Coupon"], refund: ["الاسترداد", "Refund"], wallet: ["المحفظة", "Wallet"], other: ["أخرى", "Other"],
-        ticket: ["تذكرة", "Ticket"], customer: ["العميل", "Customer"], issue: ["المشكلة", "Issue"], assignedTo: ["الموظف المسؤول", "Assigned To"], status: ["الحالة", "Status"], priority: ["الأولوية", "Priority"], createdAt: ["تاريخ الإنشاء", "Created At"]
+        ticket: ["تذكرة", "Ticket"], customer: ["اسم العميل", "Customer Name"], phone: ["رقم الجوال", "Phone Number"], issue: ["المشكلة", "Issue"], assignedTo: ["الموظف المسؤول", "Assigned To"], status: ["الحالة", "Status"], priority: ["الأولوية", "Priority"], createdAt: ["تاريخ الإنشاء", "Created At"], actions: ["الإجراءات", "Actions"]
       };
 
       function text(key) { return translations[key] ? translations[key][language === "ar" ? 0 : 1] : key; }
@@ -646,6 +472,7 @@
         document.querySelector('[data-template-id="language-toggle"]').textContent = language === "ar" ? "English" : "العربية";
         document.querySelector('[data-template-id="nav-dashboard"]').textContent = text("dashboard");
         document.querySelector('[data-template-id="nav-tickets"]').textContent = text("tickets");
+        document.querySelector('[data-template-id="nav-archive"]').textContent = text("archive");
         document.querySelector('[data-template-id="nav-employees"]').textContent = text("employees");
         document.querySelector('[data-template-id="nav-reports"]').textContent = text("reports");
         document.querySelector('[data-template-id="nav-settings"]').textContent = text("settings");
@@ -745,8 +572,8 @@
           ${pageHeader(language === "ar" ? "كل التذاكر" : "All Tickets", language === "ar" ? "بحث وفرز وتصفية تذاكر فريق خدمة العملاء" : "Search, sort, and filter customer service tickets")}
           <section class="card section-card mt-5">
             <div class="filter-grid">
-              <div><label class="sr-only" for="ticketSearch">بحث</label><input id="ticketSearch" class="field" placeholder="${language === "ar" ? "بحث: التذكرة / العميل / المشكلة" : "Search: Ticket / Customer / Issue"}"></div>
-              <div><label class="sr-only" for="statusFilter">الحالة</label><select id="statusFilter" class="select-field"><option value="">${language === "ar" ? "كل الحالات" : "All statuses"}</option>${statusOption("Open")}${statusOption("In Progress")}${statusOption("Pending Customer")}${statusOption("Resolved")}</select></div>
+              <div><label class="sr-only" for="ticketSearch">بحث</label><input id="ticketSearch" class="field" placeholder="${language === "ar" ? "بحث: التذكرة / العميل / الجوال / المشكلة" : "Search: Ticket / Customer / Phone / Issue"}"></div>
+              <div><label class="sr-only" for="statusFilter">الحالة</label><select id="statusFilter" class="select-field"><option value="">${language === "ar" ? "كل الحالات" : "All statuses"}</option>${statusOption("Open")}${statusOption("In Progress")}${statusOption("Pending Customer")}${statusOption("Resolved")}${statusOption("Closed")}</select></div>
               <div><label class="sr-only" for="priorityFilter">الأولوية</label><select id="priorityFilter" class="select-field"><option value="">${language === "ar" ? "كل الأولويات" : "All priorities"}</option>${priorityOption("Urgent")}${priorityOption("High")}${priorityOption("Medium")}${priorityOption("Low")}</select></div>
               <div><label class="sr-only" for="dateFromFilter">من تاريخ</label><input id="dateFromFilter" class="field" type="date"></div>
               <div><label class="sr-only" for="dateToFilter">إلى تاريخ</label><input id="dateToFilter" class="field" type="date"></div>
@@ -755,10 +582,11 @@
           </section>
           <section class="card mt-4 table-wrap">
             <table class="data-table">
-              <thead><tr><th>${text("ticket")}</th><th>${text("customer")}</th><th>${text("issue")}</th><th>${language === "ar" ? "التصنيف" : "Category"}</th><th>${text("priority")}</th><th>${text("assignedTo")}</th><th>${text("status")}</th><th>${text("createdAt")}</th></tr></thead>
+              <thead><tr><th>${text("ticket")}</th><th>${text("customer")}</th><th>${text("phone")}</th><th>${text("issue")}</th><th>${language === "ar" ? "التصنيف" : "Category"}</th><th>${text("priority")}</th><th>${text("assignedTo")}</th><th>${text("status")}</th><th>${text("createdAt")}</th><th>${text("actions")}</th></tr></thead>
               <tbody id="ticketTableBody"></tbody>
             </table>
-          </section>`;
+          </section>
+          <div id="paginationContainer" class="flex items-center justify-between mt-4 px-2"></div>`;
 
         const search = document.getElementById("ticketSearch");
         const status = document.getElementById("statusFilter");
@@ -766,11 +594,15 @@
         const dateFrom = document.getElementById("dateFromFilter");
         const dateTo = document.getElementById("dateToFilter");
         const body = document.getElementById("ticketTableBody");
+        const paginationContainer = document.getElementById("paginationContainer");
+
+        let currentPage = 1;
+        const pageSize = 10;
 
         function filteredTickets() {
           const query = search.value.trim().toLowerCase();
           return tickets.filter(ticket => {
-            const searchable = [ticket.id, ticket.customer, ticket.issue, ticket.assignee].join(" ").toLowerCase();
+            const searchable = [ticket.id, ticket.customer, ticket.phone, ticket.issue, ticket.assignee].join(" ").toLowerCase();
             return (!query || searchable.includes(query)) &&
               (!status.value || ticket.status === status.value) &&
               (!priority.value || ticket.priority === priority.value) &&
@@ -781,15 +613,182 @@
 
         function drawTickets() {
           const displayed = filteredTickets();
-          body.innerHTML = displayed.length ? displayed.map(ticket => `
-            <tr><td><button class="ticket-link mono open-ticket-detail" data-ticket-id="${esc(ticket.id)}" type="button">${ticket.id}</button></td><td>${esc(ticket.customer)}</td><td>${esc(ticket.issue)}</td><td>${displayCategory(ticket.category)}</td><td><span class="badge ${priorityClass(ticket.priority)}">${displayPriority(ticket.priority)}</span></td><td>${esc(ticket.assignee)}</td><td><span class="badge ${statusClass(ticket.status)}">${displayStatus(ticket.status)}</span></td><td>${ticket.createdAt}</td></tr>
-          `).join("") : `<tr><td colspan="8" class="text-center py-10 text-slate-500">${language === "ar" ? "لا توجد نتائج مطابقة للبحث أو المرشحات." : "No results match your search or filters."}</td></tr>`;
+          const totalPages = Math.ceil(displayed.length / pageSize) || 1;
+          if (currentPage > totalPages) currentPage = totalPages;
+
+          const start = (currentPage - 1) * pageSize;
+          const pageItems = displayed.slice(start, start + pageSize);
+
+          body.innerHTML = pageItems.length ? pageItems.map(ticket => `
+            <tr>
+              <td>
+                <div class="flex items-center gap-1.5">
+                  <span class="ticket-link mono">${ticket.id}</span>
+                  <button class="soft-btn !p-1.5 copy-ticket-btn" data-ticket-id="${esc(ticket.id)}" title="${language === "ar" ? "نسخ رقم التذكرة" : "Copy Ticket ID"}" type="button">
+                    <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </td>
+              <td>${esc(ticket.customer)}</td>
+              <td><span class="mono">${esc(ticket.phone)}</span></td>
+              <td>${esc(ticket.issue)}</td>
+              <td>${displayCategory(ticket.category)}</td>
+              <td><span class="badge ${priorityClass(ticket.priority)}">${displayPriority(ticket.priority)}</span></td>
+              <td>${esc(ticket.assignee)}</td>
+              <td><span class="badge ${statusClass(ticket.status)}">${displayStatus(ticket.status)}</span></td>
+              <td>${ticket.createdAt}</td>
+              <td>
+                <div class="flex items-center gap-1.5">
+                  <button class="soft-btn !p-2 open-ticket-detail" data-ticket-id="${esc(ticket.id)}" title="${language === "ar" ? "عرض تفاصيل التذكرة" : "View Ticket Details"}" type="button">
+                    <i data-lucide="eye" class="w-4 h-4 text-emerald-700"></i>
+                  </button>
+                  ${ticket.status !== 'Closed' ? `
+                    <button class="soft-btn !p-2 edit-ticket-btn" data-ticket-id="${esc(ticket.id)}" title="${language === "ar" ? "تعديل التذكرة" : "Edit Ticket"}" type="button">
+                      <i data-lucide="edit" class="w-4 h-4 text-amber-700"></i>
+                    </button>
+                  ` : ''}
+                </div>
+              </td>
+            </tr>
+          `).join("") : `<tr><td colspan="10" class="text-center py-10 text-slate-500">${language === "ar" ? "لا توجد نتائج مطابقة للبحث أو المرشحات." : "No results match your search or filters."}</td></tr>`;
+          
+          lucide.createIcons();
+
           body.querySelectorAll(".open-ticket-detail").forEach(button => button.addEventListener("click", () => openTicketModal(button.dataset.ticketId)));
+          
+          body.querySelectorAll(".edit-ticket-btn").forEach(button => button.addEventListener("click", () => openEditModal(button.dataset.ticketId)));
+
+          body.querySelectorAll(".copy-ticket-btn").forEach(button => button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const tid = button.dataset.ticketId;
+            navigator.clipboard.writeText(tid).then(() => {
+              showToast(language === "ar" ? `تم نسخ رقم التذكرة: ${tid}` : `Ticket ID copied: ${tid}`);
+            }).catch(() => {
+              showToast(language === "ar" ? "تعذر النسخ للحافظة" : "Failed to copy");
+            });
+          }));
+
+          if (displayed.length > 0) {
+            paginationContainer.innerHTML = `
+              <span class="subtle">${language === "ar" ? `عرض ${(start + 1)} إلى ${Math.min(start + pageSize, displayed.length)} من ${displayed.length} تذكرة` : `Showing ${start + 1} to ${Math.min(start + pageSize, displayed.length)} of ${displayed.length} tickets`}</span>
+              <div class="flex gap-2 items-center">
+                <button class="soft-btn" id="prevPageBtn" ${currentPage === 1 ? "disabled style='opacity:0.5;cursor:not-allowed'" : ""}>${language === "ar" ? "السابق" : "Previous"}</button>
+                <span class="subtle font-bold px-2">${currentPage} / ${totalPages}</span>
+                <button class="soft-btn" id="nextPageBtn" ${currentPage === totalPages ? "disabled style='opacity:0.5;cursor:not-allowed'" : ""}>${language === "ar" ? "التالي" : "Next"}</button>
+              </div>`;
+
+            const prevBtn = document.getElementById("prevPageBtn");
+            const nextBtn = document.getElementById("nextPageBtn");
+
+            if (prevBtn && currentPage > 1) {
+              prevBtn.addEventListener("click", () => {
+                currentPage--;
+                drawTickets();
+              });
+            }
+            if (nextBtn && currentPage < totalPages) {
+              nextBtn.addEventListener("click", () => {
+                currentPage++;
+                drawTickets();
+              });
+            }
+          } else {
+            paginationContainer.innerHTML = "";
+          }
         }
 
-        [search, status, priority, dateFrom, dateTo].forEach(control => control.addEventListener(control === search ? "input" : "change", drawTickets));
+        [search, status, priority, dateFrom, dateTo].forEach(control => control.addEventListener(control === search ? "input" : "change", () => {
+          currentPage = 1;
+          drawTickets();
+        }));
         document.getElementById("exportFilteredTicketsBtn").addEventListener("click", () => exportTickets(filteredTickets()));
         drawTickets();
+      }
+
+      // دوال قسم الأرشيف المضافة حديثاً
+      function renderArchive(main) {
+        main.innerHTML = `
+          ${pageHeader(language === "ar" ? "أرشيف التذاكر المغلقة" : "Closed Tickets Archive", language === "ar" ? "استعراض وإدارة التذاكر المغلقة والمؤرشفة" : "Review and manage closed and archived tickets")}
+          <section class="card section-card mt-5">
+            <div class="filter-grid">
+              <div><label class="sr-only" for="archiveSearch">بحث</label><input id="archiveSearch" class="field" placeholder="${language === "ar" ? "بحث في الأرشيف: رقم التذكرة / العميل / المشكلة" : "Search archive: Ticket / Customer / Issue"}"></div>
+              <div><label class="sr-only" for="archivePriorityFilter">الأولوية</label><select id="archivePriorityFilter" class="select-field"><option value="">${language === "ar" ? "كل الأولويات" : "All priorities"}</option>${priorityOption("Urgent")}${priorityOption("High")}${priorityOption("Medium")}${priorityOption("Low")}</select></div>
+              <button class="primary-btn" id="exportArchiveBtn" type="button"><i data-lucide="download"></i> ${language === "ar" ? "تصدير الأرشيف" : "Export Archive"}</button>
+            </div>
+          </section>
+          <section class="card mt-4 table-wrap">
+            <table class="data-table">
+              <thead><tr><th>${text("ticket")}</th><th>${text("customer")}</th><th>${text("phone")}</th><th>${text("issue")}</th><th>${language === "ar" ? "التصنيف" : "Category"}</th><th>${text("priority")}</th><th>${text("assignedTo")}</th><th>${language === "ar" ? "تاريخ الإغلاق" : "Closed Date"}</th><th>${text("actions")}</th></tr></thead>
+              <tbody id="archiveTableBody"></tbody>
+            </table>
+          </section>`;
+
+        const search = document.getElementById("archiveSearch");
+        const priorityFilter = document.getElementById("archivePriorityFilter");
+        const body = document.getElementById("archiveTableBody");
+
+        function drawArchive() {
+          const query = search.value.trim().toLowerCase();
+          // تصفية التذاكر المغلقة فقط للأرشيف
+          const archivedTickets = tickets.filter(ticket => {
+            const searchable = [ticket.id, ticket.customer, ticket.phone, ticket.issue, ticket.assignee].join(" ").toLowerCase();
+            return ticket.status === "Closed" &&
+              (!query || searchable.includes(query)) &&
+              (!priorityFilter.value || ticket.priority === priorityFilter.value);
+          });
+
+          body.innerHTML = archivedTickets.length ? archivedTickets.map(ticket => `
+            <tr>
+              <td><span class="ticket-link mono">${ticket.id}</span></td>
+              <td>${esc(ticket.customer)}</td>
+              <td><span class="mono">${esc(ticket.phone)}</span></td>
+              <td>${esc(ticket.issue)}</td>
+              <td>${displayCategory(ticket.category)}</td>
+              <td><span class="badge ${priorityClass(ticket.priority)}">${displayPriority(ticket.priority)}</span></td>
+              <td>${esc(ticket.assignee)}</td>
+              <td>${ticket.closedAt || ticket.createdAt}</td>
+              <td>
+                <div class="flex items-center gap-1.5">
+                  <button class="soft-btn !p-2 open-ticket-detail" data-ticket-id="${esc(ticket.id)}" title="${language === "ar" ? "عرض تفاصيل الأرشيف" : "View Archive Details"}" type="button">
+                    <i data-lucide="eye" class="w-4 h-4 text-emerald-700"></i>
+                  </button>
+                  <button class="soft-btn !p-2 restore-ticket-btn" data-db-id="${esc(ticket.dbId)}" title="${language === "ar" ? "إعادة فتح التذكرة" : "Restore Ticket"}" type="button">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4 text-blue-700"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `).join("") : `<tr><td colspan="9" class="text-center py-10 text-slate-500">${language === "ar" ? "لا توجد تذاكر مغلقة في الأرشيف حالياً." : "No closed tickets in the archive currently."}</td></tr>`;
+
+          lucide.createIcons();
+
+          body.querySelectorAll(".open-ticket-detail").forEach(button => button.addEventListener("click", () => openTicketModal(button.dataset.ticketId)));
+          
+          body.querySelectorAll(".restore-ticket-btn").forEach(button => button.addEventListener("click", async () => {
+            try {
+              const dbId = button.dataset.dbId;
+              const update = await supabaseClient.from("tickets").update({
+                status: "Open",
+                updated_at: new Date().toISOString()
+              }).eq("id", dbId);
+              if (update.error) throw update.error;
+              showToast(language === "ar" ? "تم نقل التذكرة وإعادة فتحها بنجاح." : "Ticket restored successfully.");
+              await refreshAndRender("archive");
+            } catch (error) {
+              await dbError(error);
+            }
+          }));
+        }
+
+        [search, priorityFilter].forEach(control => control.addEventListener(control === search ? "input" : "change", drawArchive));
+        document.getElementById("exportArchiveBtn").addEventListener("click", () => {
+          const archivedTickets = tickets.filter(t => t.status === "Closed");
+          const rows = archivedTickets.map(ticket => [ticket.id, ticket.customer, ticket.phone, ticket.issue, ticket.category, ticket.priority, ticket.assignee, ticket.closedAt]);
+          exportCsv(["Ticket", "Customer Name", "Customer Phone", "Issue", "Category", "Priority", "Assigned To", "Closed Date"], rows, "ticket-archive-report.csv");
+          showToast(language === "ar" ? "تم تصدير تقرير الأرشيف بنجاح." : "Archive report exported successfully.");
+        });
+
+        drawArchive();
       }
 
       function renderTicketDetail(main) {
@@ -798,49 +797,92 @@
         main.innerHTML = `
           <div class="flex items-center justify-between gap-4 flex-wrap">
             ${pageHeader(language === "ar" ? "تفاصيل التذكرة" : "Ticket Details", language === "ar" ? "متابعة كاملة للتذكرة وسجل التتبع" : "Complete ticket follow-up and activity timeline")}
-            <button class="soft-btn" id="backToTickets" type="button"><i data-lucide="arrow-right"></i> ${language === "ar" ? "العودة إلى التذاكر" : "Back to Tickets"}</button>
+            <div class="flex items-center gap-2">
+              ${ticket.status !== 'Closed' ? `
+                <button class="primary-btn" id="editFromDetailBtn" type="button"><i data-lucide="edit"></i> ${language === "ar" ? "تعديل التذكرة" : "Edit Ticket"}</button>
+              ` : ''}
+              <button class="soft-btn" id="backToTickets" type="button"><i data-lucide="arrow-right"></i> ${language === "ar" ? "العودة" : "Back"}</button>
+            </div>
           </div>
           <section class="card section-card mt-5">
-            <div class="section-head"><div><h2>${esc(ticket.id)}</h2><p class="subtle">${esc(ticket.issue)}</p></div><span class="badge ${statusClass(ticket.status)}">${esc(displayStatus(ticket.status))}</span></div>
+            <div class="section-head">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2>${esc(ticket.id)}</h2>
+                  <button class="soft-btn !p-1" id="copyDetailTicketBtn" data-ticket-id="${esc(ticket.id)}" title="${language === "ar" ? "نسخ رقم التذكرة" : "Copy Ticket ID"}" type="button">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <p class="subtle">${esc(ticket.issue)}</p>
+              </div>
+              <span class="badge ${statusClass(ticket.status)}">${esc(displayStatus(ticket.status))}</span>
+            </div>
             <div class="form-grid">
-              <div><label class="panel-label" for="detailCustomerPage">${language === "ar" ? "العميل" : "Customer"}</label><input id="detailCustomerPage" class="field" value="${esc(ticket.customer)}" readonly></div>
+              <div><label class="panel-label" for="detailCustomerPage">${language === "ar" ? "اسم العميل" : "Customer Name"}</label><input id="detailCustomerPage" class="field" value="${esc(ticket.customer)}" readonly></div>
+              <div><label class="panel-label" for="detailPhonePage">${language === "ar" ? "رقم جوال العميل" : "Customer Phone"}</label><input id="detailPhonePage" class="field mono" value="${esc(ticket.phone)}" readonly></div>
               <div><label class="panel-label" for="detailCategoryPage">${language === "ar" ? "التصنيف" : "Category"}</label><input id="detailCategoryPage" class="field" value="${esc(ticket.category)}" readonly></div>
               <div><label class="panel-label" for="detailStatusPage">${language === "ar" ? "الحالة" : "Status"}</label><select id="detailStatusPage" class="select-field">${["New","Open","In Progress","Pending Customer","Resolved","Closed"].map(value => `<option value="${value}" ${ticket.status === value ? "selected" : ""}>${displayStatus(value)}</option>`).join("")}</select></div>
               <div><label class="panel-label" for="detailAssigneePage">${language === "ar" ? "الموظف المسؤول" : "Assigned Employee"}</label><select id="detailAssigneePage" class="select-field">${employees.map(employee => `<option ${employee.name === ticket.assignee ? "selected" : ""}>${esc(employee.name)}</option>`).join("")}</select></div>
-              <div><label class="panel-label" for="detailClosedAtPage">${language === "ar" ? "تاريخ الإغلاق" : "Closed Date"}</label><input id="detailClosedAtPage" class="field" type="date" value="${ticket.closedAt || ""}"></div>
+              <div><label class="panel-label" for="detailClosedAtPage">${language === "ar" ? "تاريخ الإغلاق / الأرشفة" : "Closed / Archive Date"}</label><input id="detailClosedAtPage" class="field" type="date" value="${ticket.closedAt || ""}"></div>
+              <div class="form-full"><label class="panel-label" for="detailFinalResolution">${language === "ar" ? "الرد النهائي على العميل" : "Final Resolution / Reply to Customer"}</label><textarea id="detailFinalResolution" class="field" rows="4" placeholder="${language === "ar" ? "أدخل الرد النهائي المعتمد لإرساله أو إغلاق التذكرة بناءً عليه..." : "Enter the final approved resolution/reply..."}">${esc(ticket.finalResolution)}</textarea></div>
               <div><label class="panel-label">${language === "ar" ? "تاريخ الإنشاء" : "Created At"}</label><div class="field">${ticket.createdAt}</div></div>
             </div>
             <div class="section-head mt-6"><h2>${language === "ar" ? "المرفقات" : "Attachments"}</h2><span class="subtle">${ticket.attachments?.length || 0} ${language === "ar" ? "ملفات" : "files"}</span></div>
             <div class="grid gap-2">${ticket.attachments?.length ? ticket.attachments.map(file => `<a class="soft-btn justify-between" href="${esc(file.url)}" download="${esc(file.name)}" target="_blank" rel="noopener noreferrer"><span class="flex items-center gap-2"><i data-lucide="paperclip"></i>${esc(file.name)}</span><span>${Math.max(1, Math.round(file.size / 1024))} KB</span></a>`).join("") : `<p class="subtle">${language === "ar" ? "لا توجد مرفقات لهذه التذكرة." : "No attachments for this ticket."}</p>`}</div>
             <div class="section-head mt-6"><h2>${language === "ar" ? "سجل التواصل الداخلي" : "Internal Team Activity"}</h2><span class="subtle">${ticket.messages?.length || 0} ${language === "ar" ? "رسائل" : "messages"}</span></div>
             <div class="grid gap-3">${(ticket.messages || []).map(message => `<article class="border border-slate-100 rounded-lg p-3 ${message.role === "support" ? "bg-emerald-50" : "bg-blue-50"}"><div class="flex items-center justify-between gap-3"><strong>${esc(message.author)}</strong><time class="subtle mono">${new Date(message.at).toLocaleString(language === "ar" ? "ar-EG" : "en-US", { dateStyle: "medium", timeStyle: "short" })}</time></div><p class="subtle">${esc(message.text)}</p>${message.attachment ? `<a class="soft-btn mt-2" href="${esc(message.attachment.url)}" download="${esc(message.attachment.name)}" target="_blank" rel="noopener noreferrer"><i data-lucide="image"></i>${language === "ar" ? "فتح الصورة المرفقة" : "Open attached image"}</a>` : ""}</article>`).join("") || `<p class="subtle">${language === "ar" ? "لا توجد ردود مسجلة بعد." : "No replies recorded yet."}</p>`}</div>
-            <form id="ticketPageForm" class="mt-5"><div class="form-grid"><div class="form-full"><label class="panel-label" for="ticketReplyPage">${language === "ar" ? "التحديث" : "Update"}</label><textarea id="ticketReplyPage" class="field" rows="10" style="min-height:260px;resize:vertical"></textarea></div><div><label class="panel-label" for="ticketActorPage">${language === "ar" ? "المرسل الحالي" : "Current sender"}</label><select id="ticketActorPage" class="select-field"><option value="Admin" ${currentActor === "Admin" ? "selected" : ""}>${language === "ar" ? "المدير" : "Admin"}</option>${employees.map(employee => `<option value="${esc(employee.name)}" ${currentActor === employee.name ? "selected" : ""}>${esc(employee.name)}</option>`).join("")}</select></div><div><label class="panel-label" for="ticketReplyAttachmentPage">${language === "ar" ? "إرفاق صورة (اختياري)" : "Attach an image (optional)"}</label><input id="ticketReplyAttachmentPage" class="field" type="file" accept="image/*"><p class="subtle">${language === "ar" ? "يمكنك إرفاق صورة مع التحديث." : "Attach an image with the update."}</p></div></div><div class="flex gap-2 mt-4"><button class="primary-btn" type="submit">${language === "ar" ? "حفظ التحديثات" : "Save Updates"}</button><button class="soft-btn" id="cancelTicketPage" type="button">${language === "ar" ? "إلغاء" : "Cancel"}</button></div></form>
+            <form id="ticketPageForm" class="mt-5"><div class="form-grid"><div class="form-full"><label class="panel-label" for="ticketReplyPage">${language === "ar" ? "إضافة تحديث أو رسالة جديدة" : "Add internal update or note"}</label><textarea id="ticketReplyPage" class="field" rows="4" placeholder="${language === "ar" ? "اكتب تفاصيل التحديث أو الملاحظة..." : "Type update details..."}"></textarea></div><div><label class="panel-label" for="ticketActorPage">${language === "ar" ? "المرسل الحالي" : "Current sender"}</label><select id="ticketActorPage" class="select-field"><option value="Admin" ${currentActor === "Admin" ? "selected" : ""}>${language === "ar" ? "المدير" : "Admin"}</option>${employees.map(employee => `<option value="${esc(employee.name)}" ${currentActor === employee.name ? "selected" : ""}>${esc(employee.name)}</option>`).join("")}</select></div><div><label class="panel-label" for="ticketReplyAttachmentPage">${language === "ar" ? "إرفاق صورة (اختياري)" : "Attach an image (optional)"}</label><input id="ticketReplyAttachmentPage" class="field" type="file" accept="image/*"></div></div><div class="flex gap-2 mt-4"><button class="primary-btn" type="submit">${language === "ar" ? "حفظ التحديثات ونقلها للأرشيف إن أغلقت" : "Save Updates"}</button><button class="soft-btn" id="cancelTicketPage" type="button">${language === "ar" ? "إلغاء" : "Cancel"}</button></div></form>
           </section>`;
-        document.getElementById("backToTickets").addEventListener("click", () => { currentView = "tickets"; render(); });
-        document.getElementById("cancelTicketPage").addEventListener("click", () => { currentView = "tickets"; render(); });
+        
+        document.getElementById("copyDetailTicketBtn").addEventListener("click", () => {
+          navigator.clipboard.writeText(ticket.id).then(() => {
+            showToast(language === "ar" ? `تم نسخ رقم التذكرة: ${ticket.id}` : `Ticket ID copied: ${ticket.id}`);
+          });
+        });
+
+        const editBtn = document.getElementById("editFromDetailBtn");
+        if (editBtn) {
+          editBtn.addEventListener("click", () => openEditModal(ticket.id));
+        }
+
+        document.getElementById("backToTickets").addEventListener("click", () => { render(); });
+        document.getElementById("cancelTicketPage").addEventListener("click", () => { render(); });
         document.getElementById("ticketPageForm").addEventListener("submit", async event => {
           event.preventDefault();
           try {
             const statusValue = document.getElementById("detailStatusPage").value;
             const assigneeName = document.getElementById("detailAssigneePage").value;
             const assignee = employees.find(e => e.name === assigneeName);
-            const closedDate = document.getElementById("detailClosedAtPage").value;
+            let closedDate = document.getElementById("detailClosedAtPage").value;
+            
+            // إذا تم تغيير الحالة إلى مغلقة ولم يُحدد تاريخ الإغلاق، نضع تاريخ اليوم تلقائياً لتسجيلها في الأرشيف
+            if (statusValue === "Closed" && !closedDate) {
+              closedDate = new Date().toISOString().slice(0, 10);
+            }
+
+            const finalResolutionText = document.getElementById("detailFinalResolution").value.trim();
             currentActor = document.getElementById("ticketActorPage").value;
             const reply = document.getElementById("ticketReplyPage").value.trim();
             const replyImage = document.getElementById("ticketReplyAttachmentPage").files[0];
 
+            const auditEntry = { author: currentActor, change: "تحديث التذكرة", from: ticket.status, to: statusValue, at: new Date().toISOString() };
+            const nextAudit = Array.isArray(ticket.audit) ? [auditEntry, ...ticket.audit] : [auditEntry];
             const update = await supabaseClient.from("tickets").update({
               status: statusValue,
               assignee_id: assignee?.id || null,
-              closed_at: closedDate ? new Date(`${closedDate}T00:00:00`).toISOString() : null,
+              final_resolution: finalResolutionText,
+              final_reply: finalResolutionText,
+              final_reply_updated_at: finalResolutionText ? new Date().toISOString() : null,
+              closed_at: statusValue === "Closed" && closedDate ? new Date(`${closedDate}T00:00:00`).toISOString() : null,
+              audit: nextAudit,
               updated_at: new Date().toISOString()
             }).eq("id", ticket.dbId);
             if (update.error) throw update.error;
 
             if (reply || replyImage) await addMessage(ticket.dbId, reply, currentActor, replyImage);
 
-            showToast(language === "ar" ? "تم تحديث التذكرة بنجاح." : "Ticket updated successfully.");
-            await refreshAndRender("ticket-detail");
+            showToast(language === "ar" ? "تم تحديث التذكرة وأرشفتها بنجاح." : "Ticket updated and archived successfully.");
+            await refreshAndRender(currentView);
           } catch (error) {
             await dbError(error);
           }
@@ -852,44 +894,86 @@
         selectedTicketId = ticketId;
         currentView = "ticket-detail";
         render();
-        return;
+      }
+
+      function openEditModal(ticketId) {
         const ticket = tickets.find(item => item.id === ticketId);
-        if (!ticket) return;
-        document.getElementById("modalRoot").innerHTML = `
-          <div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="ticketDetailTitle">
-            <section class="modal">
-              <header class="modal-head"><div><h2 id="ticketDetailTitle" class="font-extrabold">${language === "ar" ? "تفاصيل التذكرة" : "Ticket Details"}</h2><p class="subtle mono">${esc(ticket.id)}</p></div><button class="soft-btn" id="closeTicketDetail" type="button" aria-label="إغلاق"><i data-lucide="x"></i></button></header>
-              <form id="ticketDetailForm"><div class="modal-body"><div class="form-grid">
-                <div><label class="panel-label" for="detailCustomer">${language === "ar" ? "العميل" : "Customer"}</label><input id="detailCustomer" class="field" value="${esc(ticket.customer)}" readonly></div>
-                <div><label class="panel-label" for="detailIssue">${language === "ar" ? "المشكلة" : "Issue"}</label><input id="detailIssue" class="field" value="${esc(ticket.issue)}" readonly></div>
-                <div><label class="panel-label" for="detailStatus">${language === "ar" ? "تحديث الحالة" : "Update Status"}</label><select id="detailStatus" class="select-field"><option ${ticket.status === "New" ? "selected" : ""}>New</option><option ${ticket.status === "Open" ? "selected" : ""}>Open</option><option ${ticket.status === "In Progress" ? "selected" : ""}>In Progress</option><option ${ticket.status === "Pending Customer" ? "selected" : ""}>Pending Customer</option><option ${ticket.status === "Resolved" ? "selected" : ""}>Resolved</option><option ${ticket.status === "Closed" ? "selected" : ""}>Closed</option></select></div>
-                <div><label class="panel-label" for="detailAssignee">${language === "ar" ? "الموظف المسؤول" : "Assigned Employee"}</label><select id="detailAssignee" class="select-field">${employees.map(employee => `<option ${employee.name === ticket.assignee ? "selected" : ""}>${esc(employee.name)}</option>`).join("")}</select></div>
-                <div><label class="panel-label" for="detailClosedAt">${language === "ar" ? "تاريخ الإغلاق" : "Closed Date"}</label><input id="detailClosedAt" class="field" type="date" value="${ticket.closedAt || ""}"></div>
-                <div class="form-full"><p class="subtle">${language === "ar" ? "أنشئت في: " : "Created: "}${ticket.createdAt}</p></div>
-                <div class="form-full"><div class="section-head"><h3>${language === "ar" ? "سجل التواصل الداخلي" : "Internal Team Activity"}</h3><span class="subtle">${ticket.messages?.length || 0} ${language === "ar" ? "رسائل" : "messages"}</span></div><div class="grid gap-3 max-h-48 overflow-auto">${(ticket.messages || []).map(message => `<article class="border border-slate-100 rounded-lg p-3 ${message.role === "support" ? "bg-emerald-50" : "bg-blue-50"}"><div class="flex items-center justify-between gap-3"><strong>${esc(message.author)}</strong><time class="subtle mono">${new Date(message.at).toLocaleString(language === "ar" ? "ar-EG" : "en-US", { dateStyle: "medium", timeStyle: "short" })}</time></div><p class="subtle">${esc(message.text)}</p></article>`).join("") || `<p class="subtle">${language === "ar" ? "لا توجد ردود مسجلة بعد." : "No replies recorded yet."}</p>`}</div></div>
-                <div class="form-full"><label class="panel-label" for="ticketReply">${language === "ar" ? "إضافة تحديث للأدمن أو فريق الدعم" : "Add Admin or Support Update"}</label><textarea id="ticketReply" class="field" rows="3" placeholder="${language === "ar" ? "اكتب الرد بينك وبين موظف الدعم..." : "Write a reply between you and the support agent..."}></textarea></div>
-              </div></div><footer class="modal-foot"><button class="primary-btn" type="submit">${language === "ar" ? "حفظ التحديثات" : "Save Updates"}</button><button class="soft-btn" id="cancelTicketDetail" type="button">${language === "ar" ? "إلغاء" : "Cancel"}</button></footer></form>
-            </section>
+        if (!ticket || ticket.status === 'Closed') return;
+
+        document.body.classList.add("edit-ticket-mode");
+        currentView = "edit-ticket";
+        
+        const main = document.getElementById("appMain");
+        main.innerHTML = `
+          <div class="create-ticket-screen">
+            <div class="create-ticket-inner">
+              <div class="flex items-center justify-between gap-4 flex-wrap">
+                ${pageHeader(language === "ar" ? "تعديل التذكرة" : "Edit Ticket", language === "ar" ? "تعديل بيانات التذكرة الحالية" : "Edit current ticket details")}
+                <button class="soft-btn" id="cancelEditTicket" type="button"><i data-lucide="arrow-right"></i> ${language === "ar" ? "إلغاء والعودة" : "Cancel & Back"}</button>
+              </div>
+              <section class="create-ticket-card">
+            <form id="editTicketForm">
+              <div class="form-grid">
+                <div><label class="panel-label" for="editCustomerName">${language === "ar" ? "اسم العميل *" : "Customer Name *"}</label><input id="editCustomerName" class="field" value="${esc(ticket.customer)}" required></div>
+                <div><label class="panel-label" for="editCustomerPhone">${language === "ar" ? "رقم جوال العميل *" : "Customer Phone *"}</label><input id="editCustomerPhone" class="field mono" type="tel" value="${esc(ticket.phone)}" required></div>
+                <div><label class="panel-label" for="editTicketIssue">${language === "ar" ? "ملخص المشكلة *" : "Issue Summary *"}</label><input id="editTicketIssue" class="field" value="${esc(ticket.issue)}" required></div>
+                <div><label class="panel-label" for="editTicketCategory">${language === "ar" ? "التصنيف *" : "Category *"}</label><select id="editTicketCategory" class="select-field" required><option value="Payment" ${ticket.category === 'Payment' ? 'selected' : ''}>Payment</option><option value="Coupon" ${ticket.category === 'Coupon' ? 'selected' : ''}>Coupon</option><option value="Refund" ${ticket.category === 'Refund' ? 'selected' : ''}>Refund</option><option value="Wallet" ${ticket.category === 'Wallet' ? 'selected' : ''}>Wallet</option><option value="Other" ${ticket.category === 'Other' ? 'selected' : ''}>Other</option></select></div>
+                <div><label class="panel-label" for="editTicketPriority">${language === "ar" ? "الأولوية *" : "Priority *"}</label><select id="editTicketPriority" class="select-field"><option value="Low" ${ticket.priority === 'Low' ? 'selected' : ''}>Low</option><option value="Medium" ${ticket.priority === 'Medium' ? 'selected' : ''}>Medium</option><option value="High" ${ticket.priority === 'High' ? 'selected' : ''}>High</option><option value="Urgent" ${ticket.priority === 'Urgent' ? 'selected' : ''}>Urgent</option></select></div>
+                <div><label class="panel-label" for="editTicketSource">${language === "ar" ? "مصدر التذكرة *" : "Ticket Source *"}</label><select id="editTicketSource" class="select-field" required><option value="">${language === "ar" ? "اختيار مصدر التذكرة" : "Choose ticket source"}</option>${ticketSources.map(source => `<option ${ticket.source === source ? 'selected' : ''}>${esc(source)}</option>`).join("")}</select></div>
+                <div><label class="panel-label" for="editTicketAssignee">${language === "ar" ? "الموظف المسؤول *" : "Assigned Employee *"}</label><select id="editTicketAssignee" class="select-field">${employees.map(employee => `<option ${ticket.assignee === employee.name ? 'selected' : ''}>${esc(employee.name)}</option>`).join("")}</select></div>
+                <div><label class="panel-label" for="editTicketStatus">${language === "ar" ? "الحالة *" : "Status *"}</label><select id="editTicketStatus" class="select-field"><option value="New" ${ticket.status === 'New' ? 'selected' : ''}>New</option><option value="Open" ${ticket.status === 'Open' ? 'selected' : ''}>Open</option><option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option><option value="Pending Customer" ${ticket.status === 'Pending Customer' ? 'selected' : ''}>Pending Customer</option><option value="Resolved" ${ticket.status === 'Resolved' ? 'selected' : ''}>Resolved</option><option value="Closed" ${ticket.status === 'Closed' ? 'selected' : ''}>Closed (Archive)</option></select></div>
+                <div class="form-full"><label class="panel-label" for="editTicketDescription">${language === "ar" ? "وصف المشكلة *" : "Issue Description *"}</label><textarea id="editTicketDescription" class="field min-h-24" required>${esc(ticket.description)}</textarea></div>
+              </div>
+              <div class="flex gap-2 mt-5 flex-wrap">
+                <button class="primary-btn" type="submit">${language === "ar" ? "حفظ التعديلات" : "Save Changes"}</button>
+                <button class="soft-btn" id="cancelEditTicketBottom" type="button">${language === "ar" ? "إلغاء" : "Cancel"}</button>
+              </div>
+            </form>
+              </section>
+            </div>
           </div>`;
-        lucide.createIcons();
-        const close = () => document.getElementById("modalRoot").innerHTML = "";
-        document.getElementById("closeTicketDetail").addEventListener("click", close);
-        document.getElementById("cancelTicketDetail").addEventListener("click", close);
-        document.getElementById("ticketDetailForm").addEventListener("submit", event => {
-          event.preventDefault();
-          ticket.status = document.getElementById("detailStatus").value;
-          ticket.assignee = document.getElementById("detailAssignee").value;
-          ticket.closedAt = document.getElementById("detailClosedAt").value;
-          const reply = document.getElementById("ticketReply").value.trim();
-          if (reply) {
-            ticket.messages = ticket.messages || [];
-            ticket.messages.push({ author: language === "ar" ? "موظف الدعم" : "Support Staff", role: "support", text: reply, at: new Date().toISOString() });
-          }
-          ticket.updated = language === "ar" ? "الآن" : "Now";
-          close();
+
+        const back = () => {
+          document.body.classList.remove("edit-ticket-mode");
+          currentView = "tickets";
           render();
-          showToast(language === "ar" ? "تم تحديث التذكرة بنجاح." : "Ticket updated successfully.");
+          window.scrollTo(0, 0);
+        };
+
+        document.getElementById("cancelEditTicket").addEventListener("click", back);
+        document.getElementById("cancelEditTicketBottom").addEventListener("click", back);
+
+        document.getElementById("editTicketForm").addEventListener("submit", async event => {
+          event.preventDefault();
+          try {
+            const assigneeName = document.getElementById("editTicketAssignee").value;
+            const assignee = employees.find(e => e.name === assigneeName);
+            const statusVal = document.getElementById("editTicketStatus").value;
+            const payload = {
+              audit: Array.isArray(ticket.audit) ? [{ author: "Admin", change: "تعديل بيانات التذكرة", from: "—", to: "تم التعديل", at: new Date().toISOString() }, ...ticket.audit] : [{ author: "Admin", change: "تعديل بيانات التذكرة", from: "—", to: "تم التعديل", at: new Date().toISOString() }],
+              customer_name: document.getElementById("editCustomerName").value.trim(),
+              customer_phone: document.getElementById("editCustomerPhone").value.trim(),
+              issue_summary: document.getElementById("editTicketIssue").value.trim(),
+              issue_description: document.getElementById("editTicketDescription").value.trim(),
+              category: document.getElementById("editTicketCategory").value,
+              source: document.getElementById("editTicketSource").value,
+              priority: document.getElementById("editTicketPriority").value,
+              assignee_id: assignee?.id || null,
+              status: statusVal,
+              closed_at: statusVal === "Closed" ? new Date().toISOString() : null,
+              updated_at: new Date().toISOString()
+            };
+
+            const updated = await supabaseClient.from("tickets").update(payload).eq("id", ticket.dbId);
+            if (updated.error) throw updated.error;
+
+            document.body.classList.remove("edit-ticket-mode");
+            await refreshAndRender("tickets");
+            showToast(language === "ar" ? "تم تعديل التذكرة بنجاح." : "Ticket updated successfully.");
+          } catch (error) { await dbError(error); }
         });
+
+        lucide.createIcons();
       }
 
       function renderEmployees(main) {
@@ -960,7 +1044,7 @@
         main.innerHTML = `
           ${pageHeader(language === "ar" ? "التقارير" : "Reports", language === "ar" ? "فلترة التذاكر وتصدير إجماليها حسب التصنيف" : "Filter tickets and export totals by category")}
           <section class="card section-card mt-5"><div class="filter-grid">
-            <div><label class="panel-label" for="reportStatusFilter">${language === "ar" ? "حالة التذكرة" : "Ticket Status"}</label><select id="reportStatusFilter" class="select-field"><option value="">${language === "ar" ? "كل الحالات" : "All statuses"}</option>${statusOption("New")}${statusOption("Open")}${statusOption("In Progress")}${statusOption("Pending Customer")}${statusOption("Resolved")}</select></div>
+            <div><label class="panel-label" for="reportStatusFilter">${language === "ar" ? "حالة التذكرة" : "Ticket Status"}</label><select id="reportStatusFilter" class="select-field"><option value="">${language === "ar" ? "كل الحالات" : "All statuses"}</option>${statusOption("New")}${statusOption("Open")}${statusOption("In Progress")}${statusOption("Pending Customer")}${statusOption("Resolved")}${statusOption("Closed")}</select></div>
             <div><label class="panel-label" for="reportEmployeeFilter">${language === "ar" ? "الموظف" : "Employee"}</label><select id="reportEmployeeFilter" class="select-field"><option value="">${language === "ar" ? "كل الموظفين" : "All employees"}</option>${employees.map(employee => `<option value="${esc(employee.name)}">${esc(employee.name)}</option>`).join("")}</select></div>
             <div class="flex items-end"><button class="primary-btn w-full" id="exportTicketsBtn" type="button"><i data-lucide="download"></i> ${language === "ar" ? "تصدير إجمالي التذاكر" : "Export Ticket Totals"}</button></div>
           </div></section>
@@ -993,8 +1077,8 @@
               <p class="subtle">${language === "ar" ? "راجع بطاقات الإجماليات وتنبيهات SLA لمعرفة عدد التذاكر المفتوحة والعاجلة والمعلقة، ثم اضغط على أي تذكرة للانتقال إلى تفاصيلها." : "Review totals and SLA alerts to see open, urgent, and pending tickets, then select any ticket to open its details."}</p>
             </article>
             <article class="card section-card">
-              <div class="section-head"><h2>${language === "ar" ? "إدارة التذاكر" : "Manage tickets"}</h2><span class="badge status-open">02</span></div>
-              <p class="subtle">${language === "ar" ? "افتح قسم التذاكر للبحث والتصفية حسب الحالة أو الأولوية أو التاريخ. استخدم زر إنشاء تذكرة لإضافة طلب جديد، ويمكنك تصدير النتائج كملف CSV." : "Use Tickets to search and filter by status, priority, or date. Create new requests with Create Ticket and export filtered results as CSV."}</p>
+              <div class="section-head"><h2>${language === "ar" ? "إدارة التذاكر والأرشيف" : "Manage tickets & archive"}</h2><span class="badge status-open">02</span></div>
+              <p class="subtle">${language === "ar" ? "افتح قسم التذاكر للبحث والتصفية. التذاكر المغلقة تنتقل تلقائياً إلى قسم الأرشيف المستقل حيث يمكنك مراجعتها أو إعادة فتحها." : "Use Tickets to search and filter. Closed tickets automatically move to the Archive section where you can review or restore them."}</p>
             </article>
             <article class="card section-card">
               <div class="section-head"><h2>${language === "ar" ? "تحديث التذكرة" : "Update a ticket"}</h2><span class="badge status-open">03</span></div>
@@ -1017,10 +1101,10 @@
           <section class="card section-card mt-5 max-w-3xl">
             <h2 class="font-extrabold text-base mb-2">${language === "ar" ? "إعدادات اتفاقية مستوى الخدمة" : "SLA Settings"}</h2><p class="subtle">${language === "ar" ? "إعدادات العرض الحالية متاحة لمدير النظام." : "Current display settings are available to the system administrator."}</p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-              <div><label class="panel-label" for="urgentSla">${displayPriority("Urgent")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="urgentSla" class="field" type="number" value="1"></div>
-              <div><label class="panel-label" for="highSla">${displayPriority("High")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="highSla" class="field" type="number" value="4"></div>
-              <div><label class="panel-label" for="mediumSla">${displayPriority("Medium")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="mediumSla" class="field" type="number" value="12"></div>
-              <div><label class="panel-label" for="lowSla">${displayPriority("Low")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="lowSla" class="field" type="number" value="24"></div>
+              <div><label class="panel-label" for="urgentSla">${displayPriority("Urgent")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="urgentSla" class="field" type="number" value="${slaSettings.Urgent ?? 1}"></div>
+              <div><label class="panel-label" for="highSla">${displayPriority("High")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="highSla" class="field" type="number" value="${slaSettings.High ?? 4}"></div>
+              <div><label class="panel-label" for="mediumSla">${displayPriority("Medium")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="mediumSla" class="field" type="number" value="${slaSettings.Medium ?? 12}"></div>
+              <div><label class="panel-label" for="lowSla">${displayPriority("Low")} — ${language === "ar" ? "ساعات" : "hours"}</label><input id="lowSla" class="field" type="number" value="${slaSettings.Low ?? 24}"></div>
             </div>
             <button id="saveSettings" class="primary-btn mt-5" type="button">${language === "ar" ? "حفظ قواعد SLA" : "Save SLA Rules"}</button>
           </section>
@@ -1121,13 +1205,12 @@
       }
 
       function exportTickets(sourceTickets) {
-        const rows = sourceTickets.map(ticket => [ticket.id, ticket.customer, ticket.issue, ticket.category, ticket.priority, ticket.assignee, ticket.status, ticket.createdAt]);
-        exportCsv(["Ticket", "Customer", "Issue", "Category", "Priority", "Assigned To", "Status", "Created At"], rows, "customer-service-tickets.csv");
+        const rows = sourceTickets.map(ticket => [ticket.id, ticket.customer, ticket.phone, ticket.issue, ticket.category, ticket.priority, ticket.assignee, ticket.status, ticket.createdAt]);
+        exportCsv(["Ticket", "Customer Name", "Customer Phone", "Issue", "Category", "Priority", "Assigned To", "Status", "Created At"], rows, "customer-service-tickets.csv");
         showToast(language === "ar" ? "تم تصدير تقرير التذاكر بنجاح." : "Ticket report exported successfully.");
       }
 
       function openCreateModal() {
-        // True page navigation: remove the dashboard shell and show a full-screen scrollable page.
         document.body.classList.add("create-ticket-mode");
         currentView = "create-ticket";
         render();
@@ -1150,8 +1233,10 @@
             <form id="ticketForm">
               <div class="form-grid">
                 <div><label class="panel-label" for="customerName">${language === "ar" ? "اسم العميل *" : "Customer Name *"}</label><input id="customerName" class="field" required></div>
+                <div><label class="panel-label" for="customerPhone">${language === "ar" ? "رقم جوال العميل *" : "Customer Phone *"}</label><input id="customerPhone" class="field mono" type="tel" placeholder="05xxxxxxxx" required></div>
                 <div><label class="panel-label" for="ticketShortcut">${language === "ar" ? "اختصار المشكلة" : "Issue Shortcut"}</label><select id="ticketShortcut" class="select-field"><option value="">${language === "ar" ? "اختيار اختصار أو كتابة ملخص جديد" : "Choose shortcut or write a new summary"}</option>${issueShortcuts.map(shortcut => `<option value="${esc(shortcut)}">${esc(shortcut)}</option>`).join("")}</select></div>
                 <div><label class="panel-label" for="ticketIssue">${language === "ar" ? "ملخص المشكلة *" : "Issue Summary *"}</label><input id="ticketIssue" class="field" required></div>
+                <div><label class="panel-label" for="ticketCategory">${language === "ar" ? "التصنيف *" : "Category *"}</label><select id="ticketCategory" class="select-field" required><option value="Payment">${displayCategory("Payment")}</option><option value="Coupon">${displayCategory("Coupon")}</option><option value="Refund">${displayCategory("Refund")}</option><option value="Wallet">${displayCategory("Wallet")}</option><option value="Other">${displayCategory("Other")}</option></select></div>
                 <div><label class="panel-label" for="ticketPriority">${language === "ar" ? "الأولوية *" : "Priority *"}</label><select id="ticketPriority" class="select-field"><option>Medium</option><option>Low</option><option>High</option><option>Urgent</option></select></div>
                 <div><label class="panel-label" for="ticketSource">${language === "ar" ? "مصدر التذكرة *" : "Ticket Source *"}</label><select id="ticketSource" class="select-field" required><option value="">${language === "ar" ? "اختيار مصدر التذكرة" : "Choose ticket source"}</option>${ticketSources.map(source => `<option>${esc(source)}</option>`).join("")}</select></div>
                 <div><label class="panel-label" for="ticketAssignee">${language === "ar" ? "الموظف المسؤول *" : "Assigned Employee *"}</label><select id="ticketAssignee" class="select-field">${employees.map(employee => `<option>${esc(employee.name)}</option>`).join("")}</select></div>
@@ -1185,9 +1270,10 @@
             const assignee = employees.find(e => e.name === assigneeName);
             const payload = {
               customer_name: document.getElementById("customerName").value.trim(),
+              customer_phone: document.getElementById("customerPhone").value.trim(),
               issue_summary: document.getElementById("ticketIssue").value.trim(),
               issue_description: document.getElementById("ticketDescription").value.trim(),
-              category: "Other",
+              category: document.getElementById("ticketCategory").value,
               source: document.getElementById("ticketSource").value,
               priority: document.getElementById("ticketPriority").value,
               assignee_id: assignee?.id || null,
@@ -1209,6 +1295,7 @@
         if (currentView === "create-ticket") renderCreateTicket(main);
         if (currentView === "dashboard") renderDashboard(main);
         if (currentView === "tickets") renderTickets(main);
+        if (currentView === "archive") renderArchive(main); // استدعاء دالة الأرشيف
         if (currentView === "ticket-detail") renderTicketDetail(main);
         if (currentView === "employees") renderEmployees(main);
         if (currentView === "reports") renderReports(main);
